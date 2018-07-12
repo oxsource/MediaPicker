@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/album_item_background"
+    android:orientation="vertical">
+
+    <View
+        android:id="@+id/vTopLine"
+        style="@style/AlbumSplitLine"/>
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/photoRecycleView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/vBottomLine"
+        android:layout_below="@+id/vTopLine"
+        android:overScrollMode="never"/>
+
+    <View
+        android:id="@+id/vBottomLine"
+        style="@style/AlbumSplitLine"
+        android:layout_above="@+id/rlBottom"/>
+
+    <RelativeLayout
+        android:id="@+id/sectionMask"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/rlBottom"
+        android:layout_alignParentTop="true"
+        android:background="@color/album_section_mask"
+        android:paddingEnd="@dimen/common_activity_margin"
+        android:paddingLeft="@dimen/common_activity_margin"
+        android:paddingRight="@dimen/common_activity_margin"
+        android:paddingStart="@dimen/common_activity_margin"
+        android:paddingTop="@dimen/album_section_margin_top"
+        android:visibility="gone">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/sectionRecycleView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/album_section_shape"
+            android:overScrollMode="never"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlBottom"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/picker_toolbar_height"
+        android:layout_alignParentBottom="true"
+        android:background="@color/pick_accent_color">
+
+        <TextView
+            android:id="@+id/tvSection"
+            style="@style/BottomToolText"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:text="@string/all_picture"/>
+
+        <LinearLayout
+            android:id="@+id/llCenter"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/vCenter"
+                android:layout_width="@dimen/pick_radio_size"
+                android:layout_height="@dimen/pick_radio_size"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/pick_radio_checked"/>
+
+            <TextView
+                android:id="@+id/tvCenter"
+                style="@style/BottomToolText"
+                android:paddingLeft="@dimen/pick_radio_margin"
+                android:paddingRight="0dp"
+                android:text="@string/origin_picture"/>
+        </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/tvPreview"
+            style="@style/BottomToolText"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="@string/preview"/>
+    </RelativeLayout>
+</RelativeLayout>

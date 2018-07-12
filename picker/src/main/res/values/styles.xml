@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="PickToolbar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/picker_toolbar_height</item>
+        <item name="contentInsetRight">24dp</item>
+        <item name="contentInsetStartWithNavigation">0dp</item>
+        <item name="android:background">@color/pick_accent_color</item>
+        <item name="navigationIcon">@drawable/pick_title_back</item>
+        <item name="titleTextColor">@color/pick_title_color</item>
+    </style>
+
+    <style name="BottomToolText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:paddingLeft">15dp</item>
+        <item name="android:paddingRight">15dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/bottom_tool_text</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="AlbumSplitLine">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1.5dp</item>
+        <item name="android:background">@color/album_item_background</item>
+    </style>
+
+    <style name="ToolBarStyle" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:textColor">@color/pick_title_color</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="AlbumSectionName">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textColor">@color/pick_accent_color</item>
+    </style>
+
+    <style name="AlbumSectionNum">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textColor">@color/pick_accent_light_color</item>
+    </style>
+</resources>

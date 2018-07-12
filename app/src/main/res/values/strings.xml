@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MediaPicker</string>
+    <string name="file_provider">pizzk.media.picker.demo.file.provider</string>
+</resources>

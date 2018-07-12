@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:bottom="@dimen/pick_radio_padding"
+        android:left="@dimen/pick_radio_padding"
+        android:right="@dimen/pick_radio_padding"
+        android:top="@dimen/pick_radio_padding">
+        <shape android:shape="oval">
+            <solid android:color="@color/album_item_check"/>
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#00000000"/>
+            <stroke
+                android:width="@dimen/pick_radio_stroke_width"
+                android:color="@color/album_item_check"/>
+        </shape>
+    </item>
+</layer-list>
