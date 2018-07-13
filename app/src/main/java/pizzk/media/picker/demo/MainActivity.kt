@@ -20,8 +20,9 @@ class MainActivity : AppCompatActivity() {
         label.text = "未选择照片"
         button = findViewById(R.id.button)
         PickControl.obtain().action(PickControl.ACTION_ALBUM)
-                .formats(MimeType.ofImage())
-                .limit(4)
+                .filter { uri, mime ->
+                    null !== uri && (mime in MimeType.ofImage().map { it.mime })
+                }.limit(4)
                 .callback(MainActivity@ this::onPickSuccess)
         button.setOnClickListener {
             PickControl.obtain().done(MainActivity@ this)

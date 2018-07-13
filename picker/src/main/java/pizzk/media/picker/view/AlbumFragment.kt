@@ -21,6 +21,7 @@ import pizzk.media.picker.adapter.AlbumPhotoAdapter
 import pizzk.media.picker.adapter.AlbumSectionAdapter
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.entity.AlbumItem
+import pizzk.media.picker.entity.AlbumSection
 
 class AlbumFragment : BaseFragment() {
     private lateinit var photoRecycleView: RecyclerView
@@ -42,21 +43,35 @@ class AlbumFragment : BaseFragment() {
     //动画
     private var animHideSection: AnimatorSet? = null
     private var animShowSection: AnimatorSet? = null
+    //数据
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val parent: Activity = activity!!
-        //
+        //图片适配器
         photoAdapter = AlbumPhotoAdapter(parent)
         photoAdapter.setSelectBlock(::onSelectChanged)
         photoAdapter.setTapBlock { holder, index ->
 
         }
-        //
+        //目录适配器
         sectionAdapter = AlbumSectionAdapter(parent)
-        sectionAdapter.setTapBlock { holder, index ->
-
+        sectionAdapter.setTapBlock { _, index ->
+            showSectionView(false)
+            val section: AlbumSection = sectionAdapter.getList()[index]
+            val selectSection: AlbumSection? = sectionAdapter.getSelectSection()
+            if (section == selectSection) return@setTapBlock
+            sectionAdapter.notifyDataSetChanged()
+            selectSection?.select = false
+            section.select = true
+            val name: String = section.name
+            tvSection.text = name
+            //更新数据
+            photoAdapter.append(sectionAdapter.getAlbumsBySectionIndex(index), true)
+            photoAdapter.notifyDataSetChanged()
         }
+        //初始化
+        photoAdapter.append(sectionAdapter.getAlbumsBySectionIndex(0), true)
     }
 
     override fun getLayoutId(): Int = R.layout.fragment_album
@@ -123,7 +138,6 @@ class AlbumFragment : BaseFragment() {
             val tansY = "translationY"
             val bottomHeight: Float = rlBottom.top.toFloat()
             val alpha = "alpha"
-            sectionMask.visibility = View.VISIBLE
             val translationShow: ObjectAnimator = ObjectAnimator.ofFloat(sectionRecycleView, tansY, bottomHeight, 0f)
             val alphaShow: ObjectAnimator = ObjectAnimator.ofFloat(sectionMask, alpha, 0.0f, 1.0f)
             translationShow.duration = 300
@@ -147,11 +161,15 @@ class AlbumFragment : BaseFragment() {
             animHideSection = animHide
         }
         if (shown) {
-            animShowSection?.start()
+            val anim: AnimatorSet = animShowSection ?: return
+            if (anim.isStarted) return
+            sectionMask.visibility = View.VISIBLE
+            anim.start()
         } else {
-            animHideSection?.start()
+            val anim: AnimatorSet = animHideSection ?: return
+            if (anim.isStarted) return
+            anim.start()
         }
-
     }
 
 

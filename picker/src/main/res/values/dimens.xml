@@ -11,4 +11,5 @@
 
     <dimen name="common_activity_margin">15dp</dimen>
     <dimen name="album_section_margin">25dp</dimen>
+    <dimen name="album_section_top_radius">5dp</dimen>
 </resources>

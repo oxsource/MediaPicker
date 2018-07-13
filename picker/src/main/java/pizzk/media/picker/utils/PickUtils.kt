@@ -19,8 +19,9 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
 import pizzk.media.picker.R
-import pizzk.media.picker.arch.MimeType
 import pizzk.media.picker.arch.PickControl
+import pizzk.media.picker.entity.AlbumItem
+import pizzk.media.picker.entity.AlbumSection
 import pizzk.media.picker.view.AlbumFragment
 import java.io.File
 
@@ -37,7 +38,7 @@ object PickUtils {
             Pair(Manifest.permission.READ_EXTERNAL_STORAGE, R.string.open_external_storage_permission),
             Pair(Manifest.permission.WRITE_EXTERNAL_STORAGE, R.string.open_external_storage_permission)
     )
-    const val ALBUM_PAGE_SIZE: Int = 200
+
     /**
      * 显示Fragment
      */
@@ -115,20 +116,38 @@ object PickUtils {
     }
 
     /**
-     * 根据类型加载内容获取到游标(分页加载)
+     * 加载图片资源图标
      */
-    fun loadContent(context: Context, type: MimeType, page: Int, block: (cursor: Cursor) -> Unit) {
+    fun loadImages(context: Context): List<AlbumSection> {
+        val sections: MutableList<AlbumSection> = ArrayList(1)
+        sections.add(AlbumSection("", emptyList(), true))
         val resolver: ContentResolver = context.contentResolver
-        val uri: Uri = MimeType.getContentUri(type.mime)
+        val uri: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val projection: Array<String> = arrayOf(
                 MediaStore.Files.FileColumns._ID,
-                MediaStore.MediaColumns.MIME_TYPE
+                MediaStore.MediaColumns.MIME_TYPE,
+                MediaStore.Images.Media.BUCKET_DISPLAY_NAME
         )
-        val offset: Int = page * ALBUM_PAGE_SIZE
-        val sortOrder = "${MediaStore.Images.Media.DATE_TAKEN} DESC LIMIT $ALBUM_PAGE_SIZE OFFSET $offset"
+        val sortOrder = "${MediaStore.Images.Media.DATE_TAKEN} DESC"
         val cursor: Cursor = resolver.query(uri, projection, null, null, sortOrder)
         try {
-            block(cursor)
+            val items: MutableList<AlbumItem> = ArrayList(cursor.count)
+            for (i: Int in 0 until cursor.count) {
+                if (!cursor.moveToPosition(i)) break
+                val item: AlbumItem = AlbumItem.obtain(cursor)
+                val access: Boolean = PickControl.obtain().filter().invoke(item.getUri(), item.getMime())
+                if (!access) {
+                    AlbumItem.recycle(item)
+                    continue
+                }
+                items.add(item)
+            }
+            val others: List<AlbumSection> = items.groupBy {
+                it.getBucket()
+            }.map {
+                AlbumSection(it.key, it.value, false)
+            }
+            sections.addAll(others)
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
@@ -136,23 +155,6 @@ object PickUtils {
                 cursor.close()
             }
         }
-    }
-
-    fun loadImageSection(context: Context, type: MimeType, block: (cursor: Cursor) -> Unit) {
-        val resolver: ContentResolver = context.contentResolver
-        val uri: Uri = MimeType.getContentUri(type.mime)
-        val projection: Array<String> = arrayOf(
-                "distinct ${MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME}"
-        )
-        val cursor: Cursor = resolver.query(uri, projection, null, null, null)
-        try {
-            block(cursor)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            if (!cursor.isClosed) {
-                cursor.close()
-            }
-        }
+        return sections
     }
 }

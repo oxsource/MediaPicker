@@ -31,22 +31,31 @@ class AlbumItem private constructor() {
     }
 
     private var id: Long = -1
+    private var mime: String = ""
     private var uri: Uri? = null
+    private var bucket: String = ""
 
     private fun cursor(cursor: Cursor?) {
         val c: Cursor = cursor ?: return
         id = c.getLong(c.getColumnIndex(MediaStore.Files.FileColumns._ID))
-        val mime: String = c.getString(c.getColumnIndex(MediaStore.MediaColumns.MIME_TYPE))
+        mime = c.getString(c.getColumnIndex(MediaStore.MediaColumns.MIME_TYPE))
         val contentUri: Uri = MimeType.getContentUri(mime)
         uri = ContentUris.withAppendedId(contentUri, id)
+        bucket = c.getString(c.getColumnIndex(MediaStore.Images.Media.BUCKET_DISPLAY_NAME))
     }
 
     private fun clean() {
         id = -1
         uri = null
+        mime = ""
+        bucket = ""
     }
 
     fun getUri(): Uri? = uri
+
+    fun getBucket(): String = bucket
+
+    fun getMime(): String = mime
 
     override fun equals(other: Any?): Boolean {
         if (other !is AlbumItem) return false

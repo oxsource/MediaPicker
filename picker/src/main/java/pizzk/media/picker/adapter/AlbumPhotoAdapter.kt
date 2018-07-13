@@ -4,25 +4,13 @@ import android.content.Context
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import pizzk.media.picker.R
-import pizzk.media.picker.arch.MimeType
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.entity.AlbumItem
-import pizzk.media.picker.utils.PickUtils
 
 class AlbumPhotoAdapter(context: Context) : ListAdapter<AlbumItem>(context) {
     private val selectedList: MutableList<AlbumItem> = ArrayList()
     private var selectBlock: (List<AlbumItem>) -> Unit = { _ -> }
-    //分页加载相关
-    private var loadFlag: Boolean = true
-    private var loadPage: Int = 0
-
-
-    init {
-        loadContent()
-    }
 
     override fun getLayoutId(viewType: Int): Int = R.layout.album_photo_item
 
@@ -34,7 +22,7 @@ class AlbumPhotoAdapter(context: Context) : ListAdapter<AlbumItem>(context) {
         val check: ImageView = holder.getView(R.id.check)!!
         val maskView: View = holder.getView(R.id.mask)!!
         //填充视图
-        Glide.with(context).load(item.getUri()).transition(withCrossFade()).into(image)
+        PickControl.imageLoad().load(image, item.getUri(), item.getMime())
         //选择
         updateCheckState(item, check, maskView)
         check.setOnClickListener {
@@ -67,32 +55,6 @@ class AlbumPhotoAdapter(context: Context) : ListAdapter<AlbumItem>(context) {
         } else {
             mask.visibility = View.GONE
             view.setImageResource(R.drawable.album_check_normal)
-        }
-    }
-
-    //分页加载内容
-    fun loadContent(page: Int = loadPage) {
-        if (0 == page) {
-            loadPage = 0
-            loadFlag = true
-            getList().filter { !selectedList.contains(it) }.forEach { AlbumItem.recycle(it) }
-            getList().clear()
-        } else if (page < loadPage) {
-            return
-        }
-        if (!loadFlag) return
-        PickUtils.loadContent(context, MimeType.JPEG, page) {
-            loadFlag = it.count >= PickUtils.ALBUM_PAGE_SIZE
-            loadPage = page + 1
-            val list: MutableList<AlbumItem> = ArrayList(it.count)
-            for (i: Int in 0 until it.count) {
-                if (!it.moveToPosition(i)) break
-                list.add(AlbumItem.obtain(it))
-            }
-            if (list.isEmpty()) return@loadContent
-            val lastIndex: Int = getList().size
-            append(list, false)
-            notifyItemRangeInserted(lastIndex, list.size)
         }
     }
 

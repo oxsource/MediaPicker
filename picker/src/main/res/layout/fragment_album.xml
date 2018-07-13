@@ -44,7 +44,8 @@
             android:layout_height="match_parent"
             android:layout_alignParentBottom="true"
             android:background="@drawable/album_section_shape"
-            android:overScrollMode="never"/>
+            android:overScrollMode="never"
+            android:paddingTop="@dimen/album_section_top_radius"/>
     </RelativeLayout>
 
     <RelativeLayout

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.support.annotation.IntDef
+import pizzk.media.picker.utils.ImageLoadImpl
 import pizzk.media.picker.view.PickActivity
 
 /**
@@ -23,9 +24,10 @@ class PickControl private constructor() {
 
         //文件权限
         private var authority: String = ""
+        private var imageLoad: ImageLoad = ImageLoadImpl
 
         //默认函数块
-        private val dFilter: (String) -> Boolean = { _ -> false }
+        private val dFilter: (Uri?, String) -> Boolean = { _, _ -> true }
         private val dCallback: (List<Uri>) -> Unit = { _ -> Unit }
 
         private val picker: PickControl = PickControl()
@@ -37,10 +39,12 @@ class PickControl private constructor() {
         }
 
         fun authority() = authority
+
+        fun imageLoad() = imageLoad
     }
 
     private var action: Int = ACTION_NONE
-    private var filter: (String) -> Boolean = dFilter
+    private var filter: (Uri?, String) -> Boolean = dFilter
     private var limit: Int = 1
     private var callback: (List<Uri>) -> Unit = dCallback
     //裁剪
@@ -81,18 +85,10 @@ class PickControl private constructor() {
     }
 
     /**
-     * 自定义拾取过滤器
+     * 通过URI和MIME过滤
      */
-    fun filter(block: (path: String) -> Boolean): PickControl {
+    fun filter(block: (uri: Uri?, mime: String) -> Boolean): PickControl {
         this.filter = block
-        return this
-    }
-
-    /**
-     * 通过文件格式设置拾取过滤器
-     */
-    fun formats(values: Array<MimeType>, ignoreCase: Boolean = true): PickControl {
-        filter { path -> values.map { it.extensions }.flatMap { it.asList() }.any { path.endsWith(it, ignoreCase) } }
         return this
     }
 
@@ -137,7 +133,7 @@ class PickControl private constructor() {
     /**
      * 获取过滤器
      */
-    internal fun filter(): (String) -> Boolean = filter
+    internal fun filter(): (Uri?, String) -> Boolean = filter
 
     /**
      * 获取裁切参数
