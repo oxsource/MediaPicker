@@ -31,10 +31,10 @@
         android:layout_above="@+id/rlBottom"
         android:layout_alignParentTop="true"
         android:background="@color/album_section_mask"
-        android:paddingEnd="@dimen/common_activity_margin"
-        android:paddingLeft="@dimen/common_activity_margin"
-        android:paddingRight="@dimen/common_activity_margin"
-        android:paddingStart="@dimen/common_activity_margin"
+        android:paddingEnd="@dimen/pick_media_activity_margin"
+        android:paddingLeft="@dimen/pick_media_activity_margin"
+        android:paddingRight="@dimen/pick_media_activity_margin"
+        android:paddingStart="@dimen/pick_media_activity_margin"
         android:paddingTop="@dimen/album_section_margin_top"
         android:visibility="gone">
 
@@ -60,7 +60,7 @@
             style="@style/BottomToolText"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:text="@string/all_picture"/>
+            android:text="@string/pick_media_all_picture"/>
 
         <LinearLayout
             android:id="@+id/llCenter"
@@ -81,7 +81,7 @@
                 style="@style/BottomToolText"
                 android:paddingLeft="@dimen/pick_radio_margin"
                 android:paddingRight="0dp"
-                android:text="@string/origin_picture"/>
+                android:text="@string/pick_media_origin_picture"/>
         </LinearLayout>
 
 
@@ -90,6 +90,6 @@
             style="@style/BottomToolText"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:text="@string/preview"/>
+            android:text="@string/pick_media_preview"/>
     </RelativeLayout>
 </RelativeLayout>

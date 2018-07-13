@@ -35,7 +35,7 @@ class AlbumPhotoAdapter(context: Context) : ListAdapter<AlbumItem>(context) {
             }
             val limit: Int = PickControl.obtain().limit()
             if (selectedList.size >= limit) {
-                val hint: String = context.getString(R.string.hint_most_select_limit)
+                val hint: String = context.getString(R.string.pick_media_most_select_limit)
                 val content: String = String.format(hint, limit)
                 Toast.makeText(context, content, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener

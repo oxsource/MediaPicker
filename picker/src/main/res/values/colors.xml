@@ -11,4 +11,5 @@
     <color name="pick_title_color">#ffffff</color>
     <color name="album_section_mask">#eb212123</color>
     <color name="album_section_background">#ffffff</color>
+    <color name="album_preview_overlay">#ef222222</color>
 </resources>

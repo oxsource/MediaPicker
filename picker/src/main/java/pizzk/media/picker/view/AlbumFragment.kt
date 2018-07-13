@@ -78,10 +78,10 @@ class AlbumFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        getToolbar().title = getString(R.string.title_select_picture)
+        getToolbar().title = getString(R.string.pick_media_select_picture)
         getToolbar().setNavigationOnClickListener { finish() }
         //菜单按钮
-        commitMenu = getToolbar().menu.add(getString(R.string.finish))
+        commitMenu = getToolbar().menu.add(getString(R.string.pick_media_finish))
         commitMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
         commitMenu.setOnMenuItemClickListener {
             finish()
@@ -176,12 +176,12 @@ class AlbumFragment : BaseFragment() {
     //选择发生变化回调
     private fun onSelectChanged(list: List<AlbumItem>) {
         if (list.isEmpty()) {
-            tvPreview.setText(R.string.preview)
-            commitMenu.setTitle(R.string.finish)
+            tvPreview.setText(R.string.pick_media_preview)
+            commitMenu.setTitle(R.string.pick_media_finish)
             commitMenu.isEnabled = false
         } else {
-            tvPreview.text = String.format(getString(R.string.preview_format), list.size)
-            commitMenu.title = String.format(getString(R.string.finish_format), list.size, PickControl.obtain().limit())
+            tvPreview.text = String.format(getString(R.string.pick_media_preview_format), list.size)
+            commitMenu.title = String.format(getString(R.string.pick_media_finish_format), list.size, PickControl.obtain().limit())
             commitMenu.isEnabled = true
         }
     }

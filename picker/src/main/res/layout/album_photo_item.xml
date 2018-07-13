@@ -37,12 +37,7 @@
 
     <ImageView
         android:id="@+id/check"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:contentDescription="@string/description"
-        android:padding="10dp"
-        android:src="@drawable/album_check_normal"
-        android:visibility="visible"
+        style="@style/PickCheckbox"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>

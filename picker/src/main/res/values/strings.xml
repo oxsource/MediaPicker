@@ -1,16 +1,18 @@
 <resources>
     <string name="app_name">picker</string>
     <string name="description">描述</string>
-    <string name="fail_to_create_file">创建文件失败</string>
-    <string name="user_cancel">用户取消</string>
+    <string name="pick_media_fail_to_create_file">创建文件失败</string>
+    <string name="pick_media_user_cancel">用户取消</string>
     <string name="open_camera_permission">请前往设置打开相机权限</string>
     <string name="open_external_storage_permission">请前往设置打开外部存储读写权限</string>
-    <string name="hint_most_select_limit">最多只能选择%1$d张图片</string>
-    <string name="all_picture">所有图片</string>
-    <string name="origin_picture">原图</string>
-    <string name="preview">预览</string>
-    <string name="preview_format">预览(%1$d)</string>
-    <string name="title_select_picture">选择图片</string>
-    <string name="finish">完成</string>
-    <string name="finish_format">完成(%1$d/%2$d)</string>
+    <string name="pick_media_most_select_limit">最多只能选择%1$d张图片</string>
+    <string name="pick_media_all_picture">所有图片</string>
+    <string name="pick_media_edit">编辑</string>
+    <string name="pick_media_origin_picture">原图</string>
+    <string name="pick_media_preview">预览</string>
+    <string name="pick_media_preview_format">预览(%1$d)</string>
+    <string name="pick_media_select_picture">选择图片</string>
+    <string name="pick_media_finish">完成</string>
+    <string name="pick_media_finish_format">完成(%1$d/%2$d)</string>
+    <string name="pick_media_select">选择</string>
 </resources>

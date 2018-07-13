@@ -56,7 +56,7 @@ class PickActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (Activity.RESULT_CANCELED == resultCode) showToast(getString(R.string.user_cancel))
+        if (Activity.RESULT_CANCELED == resultCode) showToast(getString(R.string.pick_media_user_cancel))
         if (Activity.RESULT_OK != resultCode) {
             finish()
             return

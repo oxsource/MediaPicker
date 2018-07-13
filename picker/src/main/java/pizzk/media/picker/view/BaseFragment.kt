@@ -26,7 +26,7 @@ abstract class BaseFragment : Fragment() {
     @LayoutRes
     abstract fun getLayoutId(): Int
 
-    fun getToolbar(): Toolbar = toolbar
+    open fun getToolbar(): Toolbar = toolbar
 
     fun finish() {
         activity?.onBackPressed()

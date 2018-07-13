@@ -99,7 +99,7 @@ object PickUtils {
         //创建文件
         val optionalFile: File? = FileUtils.createPhoto(activity.application)
         if (null == optionalFile) {
-            Toast.makeText(activity, activity.getString(R.string.fail_to_create_file), Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, activity.getString(R.string.pick_media_fail_to_create_file), Toast.LENGTH_SHORT).show()
             activity.finish()
         }
         //启动相机

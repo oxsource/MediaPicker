@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="album_item_margin">1dp</dimen>
-    <dimen name="album_item_check_margin">5dp</dimen>
     <dimen name="picker_toolbar_height">45dp</dimen>
     <dimen name="pick_radio_size">15dp</dimen>
     <dimen name="pick_radio_margin">5dp</dimen>
     <dimen name="pick_radio_padding">3dp</dimen>
     <dimen name="pick_radio_stroke_width">1dp</dimen>
+    <dimen name="pick_check_box_size">36dp</dimen>
+    <dimen name="pick_media_activity_margin">15dp</dimen>
     <dimen name="album_section_margin_top">90dp</dimen>
-
-    <dimen name="common_activity_margin">15dp</dimen>
     <dimen name="album_section_margin">25dp</dimen>
     <dimen name="album_section_top_radius">5dp</dimen>
+    <dimen name="album_item_margin">1dp</dimen>
+    <dimen name="album_item_check_margin">5dp</dimen>
+    <dimen name="album_preview_bottom_line">0.1dp</dimen>
+    <dimen name="album_preview_bottom_gallery">90dp</dimen>
 </resources>

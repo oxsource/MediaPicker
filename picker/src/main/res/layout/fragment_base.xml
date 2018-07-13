@@ -7,7 +7,7 @@
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
-        app:theme="@style/ToolBarStyle"
+        app:theme="@style/PickToolbarTheme"
         style="@style/PickToolbar"/>
 
 </LinearLayout>

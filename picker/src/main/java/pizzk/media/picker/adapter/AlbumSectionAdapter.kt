@@ -16,7 +16,7 @@ class AlbumSectionAdapter(context: Context) : ListAdapter<AlbumSection>(context)
 
     init {
         val sections: List<AlbumSection> = PickUtils.loadImages(context)
-        sections[0].name = context.getString(R.string.all_picture)
+        sections[0].name = context.getString(R.string.pick_media_all_picture)
         append(sections, true)
     }
 

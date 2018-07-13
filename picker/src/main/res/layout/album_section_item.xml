@@ -6,14 +6,14 @@
     android:layout_height="wrap_content"
     android:background="@color/album_section_background"
     android:orientation="vertical"
-    android:paddingBottom="@dimen/common_activity_margin"
-    android:paddingTop="@dimen/common_activity_margin">
+    android:paddingBottom="@dimen/pick_media_activity_margin"
+    android:paddingTop="@dimen/pick_media_activity_margin">
 
     <ImageView
         android:id="@+id/image"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginLeft="@dimen/common_activity_margin"
+        android:layout_marginLeft="@dimen/pick_media_activity_margin"
         android:contentDescription="@string/description"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -24,7 +24,7 @@
         android:id="@+id/tvName"
         style="@style/AlbumSectionName"
         android:layout_marginLeft="@dimen/album_section_margin"
-        android:minWidth="@dimen/common_activity_margin"
+        android:minWidth="@dimen/pick_media_activity_margin"
         android:text=""
         app:layout_constraintBottom_toTopOf="@+id/tvNum"
         app:layout_constraintLeft_toRightOf="@id/image"
@@ -33,8 +33,8 @@
     <TextView
         android:id="@+id/tvNum"
         style="@style/AlbumSectionNum"
-        android:layout_marginTop="@dimen/common_activity_margin"
-        android:minWidth="@dimen/common_activity_margin"
+        android:layout_marginTop="@dimen/pick_media_activity_margin"
+        android:minWidth="@dimen/pick_media_activity_margin"
         android:text=""
         app:layout_constraintBottom_toBottomOf="@id/image"
         app:layout_constraintLeft_toLeftOf="@id/tvName"
