@@ -5,8 +5,10 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.Activity
+import android.net.Uri
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -22,6 +24,7 @@ import pizzk.media.picker.adapter.AlbumSectionAdapter
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.entity.AlbumItem
 import pizzk.media.picker.entity.AlbumSection
+import pizzk.media.picker.utils.PickUtils
 
 class AlbumFragment : BaseFragment() {
     private lateinit var photoRecycleView: RecyclerView
@@ -51,8 +54,9 @@ class AlbumFragment : BaseFragment() {
         //图片适配器
         photoAdapter = AlbumPhotoAdapter(parent)
         photoAdapter.setSelectBlock(::onSelectChanged)
-        photoAdapter.setTapBlock { holder, index ->
-
+        photoAdapter.setTapBlock { _, index ->
+            val uris: List<Uri> = photoAdapter.getList().mapNotNull(AlbumItem::getUri)
+            showPreviewFragment(uris, index)
         }
         //目录适配器
         sectionAdapter = AlbumSectionAdapter(parent)
@@ -124,7 +128,10 @@ class AlbumFragment : BaseFragment() {
                 changeOriginState()
             }
             tvPreview -> {
-
+                val uris: List<Uri> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri)
+                if (uris.isNotEmpty()) {
+                    showPreviewFragment(uris, 0)
+                }
             }
             sectionMask -> {
                 showSectionView(false)
@@ -132,7 +139,16 @@ class AlbumFragment : BaseFragment() {
         }
     }
 
+    //进入预览界面
+    private fun showPreviewFragment(uris: List<Uri>, index: Int) {
+        val list: ArrayList<Uri> = ArrayList(uris)
+        val selects: ArrayList<Uri> = ArrayList(photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri))
+        val showSelect = true
+        val bundle: Bundle = PreviewFragment.getPreviewBundle(list, index, showSelect, selects)
+        PickUtils.showFragment(activity as AppCompatActivity, PreviewFragment(), bundle, true)
+    }
 
+    //控制图片目录界面显示与隐藏
     private fun showSectionView(shown: Boolean) {
         if (null == animShowSection) {
             val tansY = "translationY"

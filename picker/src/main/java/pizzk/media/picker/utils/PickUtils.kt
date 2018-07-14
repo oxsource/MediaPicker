@@ -6,6 +6,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
@@ -24,6 +25,11 @@ import pizzk.media.picker.entity.AlbumItem
 import pizzk.media.picker.entity.AlbumSection
 import pizzk.media.picker.view.AlbumFragment
 import java.io.File
+import android.util.DisplayMetrics
+import android.os.Build
+import android.view.View
+import android.view.WindowManager
+
 
 /**
  * 系统工具类
@@ -156,5 +162,82 @@ object PickUtils {
             }
         }
         return sections
+    }
+
+    //获取图片的Mime
+    fun getImageMime(context: Context, uri: Uri): String {
+        val projection: Array<String> = arrayOf(MediaStore.Images.Media.MIME_TYPE)
+        val resolver: ContentResolver = context.contentResolver
+        val cursor: Cursor = resolver.query(uri, projection, null, null, null)
+        val value: String = if (cursor.moveToFirst()) cursor.getString(0) else ""
+        cursor.close()
+        return value
+    }
+
+    //判断是否有导航栏
+    fun withNavBar(activity: Activity): Boolean {
+        var value = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            val windowHeight: Int = activity.resources.displayMetrics.heightPixels
+            val dm = DisplayMetrics()
+            activity.windowManager.defaultDisplay.getRealMetrics(dm)
+            val screenHeight: Int = dm.heightPixels
+            value = screenHeight - windowHeight > 0
+        }
+        return value
+    }
+
+    //隐藏状态栏
+    fun hideSystemStatusBar(activity: Activity?) {
+        activity ?: return
+        if (!withNavBar(activity)) {
+            val lp: WindowManager.LayoutParams = activity.window.attributes
+            lp.flags = lp.flags or WindowManager.LayoutParams.FLAG_FULLSCREEN;
+            activity.window.attributes = lp
+            return
+        }
+        val decorView: View = activity.window.decorView
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LOW_PROFILE
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+            return
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LOW_PROFILE
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+        }
+    }
+
+    //显示状态栏
+    fun showSystemStatusBar(activity: Activity?) {
+        activity ?: return
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) return
+        if (!withNavBar(activity)) {
+            val lp: WindowManager.LayoutParams = activity.window.attributes
+            lp.flags = lp.flags and WindowManager.LayoutParams.FLAG_FULLSCREEN.inv()
+            activity.window.attributes = lp
+            return
+        }
+        val decorView: View = activity.window.decorView
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        }
+    }
+
+    fun getStatusBarHeight(context: Context): Int {
+        val resources: Resources = context.resources
+        val resourceId: Int = resources.getIdentifier("status_bar_height", "dimen", "android")
+        return if (resourceId > 0) {
+            resources.getDimensionPixelSize(resourceId)
+        } else {
+            (23 * resources.displayMetrics.density + 0.5f).toInt()
+        }
     }
 }

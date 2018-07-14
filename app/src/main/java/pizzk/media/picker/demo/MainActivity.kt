@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         PickControl.obtain().action(PickControl.ACTION_ALBUM)
                 .filter { uri, mime ->
                     null !== uri && (mime in MimeType.ofImage().map { it.mime })
-                }.limit(4)
+                }.limit(9)
                 .callback(MainActivity@ this::onPickSuccess)
         button.setOnClickListener {
             PickControl.obtain().done(MainActivity@ this)

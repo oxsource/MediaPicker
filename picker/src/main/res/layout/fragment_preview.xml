@@ -1,32 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/pick_review_background">
 
-    <android.support.v7.widget.RecyclerView
+    <android.support.v4.view.ViewPager
+        android:id="@+id/photoPager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         style="@style/PickToolbar"
         app:layout_constraintTop_toTopOf="parent"
-        app:theme="@style/PickToolbarTheme"/>
+        app:theme="@style/PickToolbarTheme" />
 
     <android.support.v7.widget.RecyclerView
+        android:id="@+id/selectRecycleView"
         android:layout_width="match_parent"
         android:layout_height="@dimen/album_preview_bottom_gallery"
         android:background="@color/album_preview_overlay"
-        app:layout_constraintBottom_toTopOf="@+id/vBottomLine"/>
+        app:layout_constraintBottom_toTopOf="@+id/rlBottom" />
 
-    <View
-        android:id="@+id/vBottomLine"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/album_preview_bottom_line"
-        android:background="@color/pick_title_color"
-        app:layout_constraintBottom_toTopOf="@+id/rlBottom"/>
 
     <RelativeLayout
         android:id="@+id/rlBottom"
@@ -35,13 +32,19 @@
         android:background="@color/album_preview_overlay"
         app:layout_constraintBottom_toBottomOf="parent">
 
+        <View
+            android:id="@+id/vBottomLine"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/album_preview_bottom_line"
+            android:background="@color/pick_review_bottom_line" />
+
         <TextView
             android:id="@+id/tvEdit"
             style="@style/BottomToolText"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:text="@string/pick_media_edit"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <LinearLayout
             android:id="@+id/llCenter"
@@ -56,18 +59,19 @@
                 android:layout_width="@dimen/pick_radio_size"
                 android:layout_height="@dimen/pick_radio_size"
                 android:layout_gravity="center_vertical"
-                android:background="@drawable/pick_radio_checked"/>
+                android:background="@drawable/pick_radio_checked" />
 
             <TextView
                 android:id="@+id/tvCenter"
                 style="@style/BottomToolText"
                 android:paddingLeft="@dimen/pick_radio_margin"
                 android:paddingRight="0dp"
-                android:text="@string/pick_media_origin_picture"/>
+                android:text="@string/pick_media_origin_picture" />
         </LinearLayout>
 
 
         <LinearLayout
+            android:id="@+id/llSelect"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
@@ -77,13 +81,13 @@
                 android:id="@+id/check"
                 style="@style/PickCheckbox"
                 android:layout_gravity="center_vertical"
-                android:padding="10dp"/>
+                android:padding="10dp" />
 
             <TextView
                 android:id="@+id/tvSelect"
                 style="@style/BottomToolText"
                 android:paddingLeft="0dp"
-                android:text="@string/pick_media_select"/>
+                android:text="@string/pick_media_select" />
         </LinearLayout>
 
     </RelativeLayout>

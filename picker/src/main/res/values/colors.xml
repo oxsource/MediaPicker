@@ -3,7 +3,7 @@
     <color name="album_item_background">#000000</color>
     <color name="album_item_image">#393a3f</color>
     <color name="album_item_mask">#66000000</color>
-    <color name="album_item_check">#f7cd6a</color>
+    <color name="album_item_check">#5bb72d</color>
     <color name="album_item_uncheck">#ffffff</color>
     <color name="pick_accent_color">#303135</color>
     <color name="pick_accent_light_color">#505156</color>
@@ -11,5 +11,7 @@
     <color name="pick_title_color">#ffffff</color>
     <color name="album_section_mask">#eb212123</color>
     <color name="album_section_background">#ffffff</color>
-    <color name="album_preview_overlay">#ef222222</color>
+    <color name="album_preview_overlay">#e5000000</color>
+    <color name="pick_review_background">#000000</color>
+    <color name="pick_review_bottom_line">#262626</color>
 </resources>
