@@ -16,20 +16,17 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentTransaction
 import android.support.v4.content.FileProvider
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
 import pizzk.media.picker.R
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.entity.AlbumItem
 import pizzk.media.picker.entity.AlbumSection
-import pizzk.media.picker.view.AlbumFragment
 import java.io.File
-import android.util.DisplayMetrics
 import android.os.Build
+import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.view.WindowManager
-
+import pizzk.media.picker.view.AlbumActivity
 
 /**
  * 系统工具类
@@ -44,20 +41,6 @@ object PickUtils {
             Pair(Manifest.permission.READ_EXTERNAL_STORAGE, R.string.open_external_storage_permission),
             Pair(Manifest.permission.WRITE_EXTERNAL_STORAGE, R.string.open_external_storage_permission)
     )
-
-    /**
-     * 显示Fragment
-     */
-    fun showFragment(activity: AppCompatActivity, fragment: Fragment, bundle: Bundle, stack: Boolean = false) {
-        val fm: FragmentManager = activity.supportFragmentManager
-        val ft: FragmentTransaction = fm.beginTransaction()
-        fragment.arguments = bundle
-        ft.add(R.id.frameLayout, fragment)
-        if (stack) {
-            ft.addToBackStack(fragment::class.java.simpleName)
-        }
-        ft.commit()
-    }
 
     /**
      * 检查权限
@@ -83,13 +66,15 @@ object PickUtils {
     /**
      * 启动相册
      */
-    fun launchAlbum(activity: AppCompatActivity) {
+    fun launchAlbum(activity: AppCompatActivity, finish: Boolean) {
         val access: Boolean = checkPermission(activity, externalPermission) {
             Log.d(activity::class.java.simpleName, "permission refused:$it")
             activity.finish()
         }
         if (!access) return
-        showFragment(activity, AlbumFragment(), activity.intent.extras)
+        val intent = Intent(activity, AlbumActivity::class.java)
+        activity.startActivity(intent)
+        if (finish) activity.finish()
     }
 
     /**
@@ -174,61 +159,29 @@ object PickUtils {
         return value
     }
 
-    //判断是否有导航栏
-    fun withNavBar(activity: Activity): Boolean {
-        var value = true
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            val windowHeight: Int = activity.resources.displayMetrics.heightPixels
-            val dm = DisplayMetrics()
-            activity.windowManager.defaultDisplay.getRealMetrics(dm)
-            val screenHeight: Int = dm.heightPixels
-            value = screenHeight - windowHeight > 0
-        }
-        return value
-    }
-
     //隐藏状态栏
-    fun hideSystemStatusBar(activity: Activity?) {
-        activity ?: return
-        if (!withNavBar(activity)) {
-            val lp: WindowManager.LayoutParams = activity.window.attributes
-            lp.flags = lp.flags or WindowManager.LayoutParams.FLAG_FULLSCREEN;
-            activity.window.attributes = lp
-            return
-        }
+    fun hideSystemStatusBar(activity: Activity?): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return false
+        activity ?: return false
         val decorView: View = activity.window.decorView
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    or View.SYSTEM_UI_FLAG_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-            return
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    or View.SYSTEM_UI_FLAG_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
-        }
+        decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                or View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                or View.SYSTEM_UI_FLAG_IMMERSIVE)
+        return true
     }
 
     //显示状态栏
-    fun showSystemStatusBar(activity: Activity?) {
-        activity ?: return
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) return
-        if (!withNavBar(activity)) {
-            val lp: WindowManager.LayoutParams = activity.window.attributes
-            lp.flags = lp.flags and WindowManager.LayoutParams.FLAG_FULLSCREEN.inv()
-            activity.window.attributes = lp
-            return
-        }
+    fun showSystemStatusBar(activity: Activity?): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return false
+        activity ?: return false
         val decorView: View = activity.window.decorView
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        }
+        decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+        return true
     }
 
     fun getStatusBarHeight(context: Context): Int {

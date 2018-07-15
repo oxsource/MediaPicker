@@ -5,9 +5,6 @@
               xmlns:app="http://schemas.android.com/apk/res-auto"
               android:orientation="vertical">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        app:theme="@style/PickToolbarTheme"
-        style="@style/PickToolbar"/>
+
 
 </LinearLayout>

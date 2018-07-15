@@ -19,21 +19,23 @@ class PickActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_media)
-        val bundle: Bundle = intent.extras
+        setContentView(R.layout.activity_pick)
         val picker: PickControl = PickControl.obtain()
         when (picker.action()) {
             PickControl.ACTION_ALBUM -> {
-                PickUtils.launchAlbum(PickActivity@ this)
+                PickUtils.launchAlbum(PickActivity@ this, true)
             }
             PickControl.ACTION_CAMERA -> {
                 PickUtils.launchCamera(PickActivity@ this, PickActivity.REQUEST_CODE_CAMERA)
             }
             PickControl.ACTION_PREVIEW -> {
-                PickUtils.showFragment(PickActivity@ this, PreviewFragment(), bundle)
+                val uris: List<Uri> = picker.previews()
+                val previewIndex: Int = picker.previewsIndex()
+                val showSelect = false
+                PreviewActivity.show(this@PickActivity, uris, uris, previewIndex, showSelect)
+                finish()
             }
             PickControl.ACTION_CROP -> {
-                PickUtils.showFragment(PickActivity@ this, CropFragment(), bundle)
             }
             else -> {
                 Log.d(TAG, "PickControl not support action: ${picker.action()}")
@@ -46,10 +48,10 @@ class PickActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (PickControl.obtain().action()) {
             PickControl.ACTION_CAMERA -> {
-                PickUtils.launchCamera(PickActivity@ this, PickActivity.REQUEST_CODE_CAMERA)
+                PickUtils.launchCamera(this@PickActivity, PickActivity.REQUEST_CODE_CAMERA)
             }
             PickControl.ACTION_ALBUM -> {
-                PickUtils.launchAlbum(PickActivity@ this)
+                PickUtils.launchAlbum(this@PickActivity, true)
             }
         }
     }

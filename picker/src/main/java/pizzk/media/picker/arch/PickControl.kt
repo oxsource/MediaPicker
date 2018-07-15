@@ -120,8 +120,6 @@ class PickControl private constructor() {
     fun done(activity: Activity) {
         if (ACTION_NONE == action) return
         val intent = Intent(activity, PickActivity::class.java)
-        val bundle = Bundle()
-        intent.putExtras(bundle)
         activity.startActivity(intent)
     }
 

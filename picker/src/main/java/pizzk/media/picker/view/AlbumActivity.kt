@@ -5,14 +5,12 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.Activity
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SimpleItemAnimator
+import android.support.v7.widget.*
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -24,19 +22,20 @@ import pizzk.media.picker.adapter.AlbumSectionAdapter
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.entity.AlbumItem
 import pizzk.media.picker.entity.AlbumSection
-import pizzk.media.picker.utils.PickUtils
 
-class AlbumFragment : BaseFragment() {
-    private lateinit var photoRecycleView: RecyclerView
+/**
+ * 相册Activity
+ */
+class AlbumActivity : AppCompatActivity() {
+    private lateinit var toolbar: Toolbar
+    private lateinit var photosView: RecyclerView
     private lateinit var tvSection: TextView
     private lateinit var vCenter: View
     private lateinit var llCenter: View
     private lateinit var tvPreview: TextView
     private lateinit var rlBottom: View
-    //相册目录
     private lateinit var sectionMask: View
-    private lateinit var sectionRecycleView: RecyclerView
-    //标题菜单
+    private lateinit var sectionsView: RecyclerView
     private lateinit var commitMenu: MenuItem
     //适配器
     private lateinit var photoAdapter: AlbumPhotoAdapter
@@ -46,20 +45,26 @@ class AlbumFragment : BaseFragment() {
     //动画
     private var animHideSection: AnimatorSet? = null
     private var animShowSection: AnimatorSet? = null
-    //数据
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val parent: Activity = activity!!
+        setContentView(R.layout.activity_album)
+        setupAdapter()
+        initViews()
+    }
+
+    //初始化适配器
+    private fun setupAdapter() {
         //图片适配器
-        photoAdapter = AlbumPhotoAdapter(parent)
+        photoAdapter = AlbumPhotoAdapter(baseContext)
         photoAdapter.setSelectBlock(::onSelectChanged)
         photoAdapter.setTapBlock { _, index ->
             val uris: List<Uri> = photoAdapter.getList().mapNotNull(AlbumItem::getUri)
-            showPreviewFragment(uris, index)
+            val selects: List<Uri> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri)
+            PreviewActivity.show(this@AlbumActivity, uris, selects, index, true)
         }
         //目录适配器
-        sectionAdapter = AlbumSectionAdapter(parent)
+        sectionAdapter = AlbumSectionAdapter(baseContext)
         sectionAdapter.setTapBlock { _, index ->
             showSectionView(false)
             val section: AlbumSection = sectionAdapter.getList()[index]
@@ -74,45 +79,48 @@ class AlbumFragment : BaseFragment() {
             photoAdapter.append(sectionAdapter.getAlbumsBySectionIndex(index), true)
             photoAdapter.notifyDataSetChanged()
         }
-        //初始化
+        //初始化数据
         photoAdapter.append(sectionAdapter.getAlbumsBySectionIndex(0), true)
     }
 
-    override fun getLayoutId(): Int = R.layout.fragment_album
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        getToolbar().title = getString(R.string.pick_media_select_picture)
-        getToolbar().setNavigationOnClickListener { finish() }
-        //菜单按钮
-        commitMenu = getToolbar().menu.add(getString(R.string.pick_media_finish))
+    //初始化视图控件
+    private fun initViews() {
+        //标题栏
+        toolbar = findViewById(R.id.toolbar)
+        toolbar.title = getString(R.string.pick_media_select_picture)
+        toolbar.setNavigationOnClickListener { finish() }
+        //提交按钮
+        commitMenu = toolbar.menu.add(getString(R.string.pick_media_finish))
         commitMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
         commitMenu.setOnMenuItemClickListener {
+            val selectUris: List<Uri> = photoAdapter.getSelectList().mapNotNull { it.getUri() }
+            PickControl.obtain().callbacks().invoke(selectUris)
             finish()
             return@setOnMenuItemClickListener true
         }
-        //图片列表
-        photoRecycleView = view.findViewById(R.id.photoRecycleView)
-        (photoRecycleView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-        val layoutManager = GridLayoutManager(context!!, resources.getInteger(R.integer.album_span_count))
-        photoRecycleView.layoutManager = layoutManager
-        photoRecycleView.adapter = photoAdapter
+        //图像列表
+        photosView = findViewById(R.id.photoRecycleView)
+        (photosView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        val layoutManager = GridLayoutManager(baseContext, resources.getInteger(R.integer.album_span_count))
+        photosView.layoutManager = layoutManager
+        photosView.adapter = photoAdapter
         //底部操作栏
-        tvSection = view.findViewById(R.id.tvSection)
+        tvSection = findViewById(R.id.tvSection)
         tvSection.setOnClickListener(::onWidgetClick)
-        vCenter = view.findViewById(R.id.vCenter)
+        vCenter = findViewById(R.id.vCenter)
         changeOriginState()
-        llCenter = view.findViewById(R.id.llCenter)
+        llCenter = findViewById(R.id.llCenter)
         llCenter.setOnClickListener(::onWidgetClick)
-        tvPreview = view.findViewById(R.id.tvPreview)
+        tvPreview = findViewById(R.id.tvPreview)
         tvPreview.setOnClickListener(::onWidgetClick)
-        rlBottom = view.findViewById(R.id.rlBottom)
+        rlBottom = findViewById(R.id.rlBottom)
         //相册目录
-        sectionMask = view.findViewById(R.id.sectionMask)
+        sectionMask = findViewById(R.id.sectionMask)
         sectionMask.setOnClickListener(::onWidgetClick)
-        sectionRecycleView = view.findViewById(R.id.sectionRecycleView)
-        sectionRecycleView.layoutManager = LinearLayoutManager(context)
-        sectionRecycleView.adapter = sectionAdapter
+        sectionsView = findViewById(R.id.sectionRecycleView)
+        sectionsView.layoutManager = LinearLayoutManager(baseContext)
+        sectionsView.adapter = sectionAdapter
         //选中状态调整
         onSelectChanged(photoAdapter.getSelectList())
     }
@@ -130,7 +138,8 @@ class AlbumFragment : BaseFragment() {
             tvPreview -> {
                 val uris: List<Uri> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri)
                 if (uris.isNotEmpty()) {
-                    showPreviewFragment(uris, 0)
+                    val selects: List<Uri> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri)
+                    PreviewActivity.show(this@AlbumActivity, uris, selects, 0, true)
                 }
             }
             sectionMask -> {
@@ -139,22 +148,13 @@ class AlbumFragment : BaseFragment() {
         }
     }
 
-    //进入预览界面
-    private fun showPreviewFragment(uris: List<Uri>, index: Int) {
-        val list: ArrayList<Uri> = ArrayList(uris)
-        val selects: ArrayList<Uri> = ArrayList(photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri))
-        val showSelect = true
-        val bundle: Bundle = PreviewFragment.getPreviewBundle(list, index, showSelect, selects)
-        PickUtils.showFragment(activity as AppCompatActivity, PreviewFragment(), bundle, true)
-    }
-
     //控制图片目录界面显示与隐藏
     private fun showSectionView(shown: Boolean) {
         if (null == animShowSection) {
             val tansY = "translationY"
             val bottomHeight: Float = rlBottom.top.toFloat()
             val alpha = "alpha"
-            val translationShow: ObjectAnimator = ObjectAnimator.ofFloat(sectionRecycleView, tansY, bottomHeight, 0f)
+            val translationShow: ObjectAnimator = ObjectAnimator.ofFloat(sectionsView, tansY, bottomHeight, 0f)
             val alphaShow: ObjectAnimator = ObjectAnimator.ofFloat(sectionMask, alpha, 0.0f, 1.0f)
             translationShow.duration = 300
             val animShow = AnimatorSet()
@@ -162,7 +162,7 @@ class AlbumFragment : BaseFragment() {
             animShow.play(translationShow).with(alphaShow)
             animShowSection = animShow
             //隐藏动画
-            val translationHide: ObjectAnimator = ObjectAnimator.ofFloat(sectionRecycleView, tansY, 0f, bottomHeight)
+            val translationHide: ObjectAnimator = ObjectAnimator.ofFloat(sectionsView, tansY, 0f, bottomHeight)
             val alphaHide: ObjectAnimator = ObjectAnimator.ofFloat(sectionMask, alpha, 1.0f, 0.0f)
             translationHide.duration = 240
             val animHide = AnimatorSet()
@@ -202,10 +202,30 @@ class AlbumFragment : BaseFragment() {
         }
     }
 
-
     //调整原图选中状态
     private fun changeOriginState(check: Boolean = useOriginPhoto) {
         val res: Int = if (check) R.drawable.pick_radio_checked else R.drawable.pick_radio_normal
-        vCenter.background = ContextCompat.getDrawable(context!!, res)
+        vCenter.background = ContextCompat.getDrawable(baseContext, res)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode != Activity.RESULT_OK) return
+        when (requestCode) {
+            PreviewActivity.REQUEST_PREVIEW -> {
+                val intent: Intent = data ?: return
+                val key: String = PreviewActivity.KEY_RESULT_DATA
+                val selectUris: List<Uri> = intent.getParcelableArrayListExtra(key) ?: return
+                val finish: Boolean = intent.getBooleanExtra(PreviewActivity.KEY_FINISH_FLAG, false)
+                if (finish) {
+                    PickControl.obtain().callbacks().invoke(selectUris)
+                    finish()
+                    return
+                }
+                val all: List<AlbumItem> = sectionAdapter.getAlbumsBySectionIndex(0)
+                val selectItems: List<AlbumItem> = all.filter { selectUris.contains(it.getUri()) }
+                photoAdapter.updateSelectList(selectItems)
+            }
+        }
     }
 }

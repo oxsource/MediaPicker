@@ -16,6 +16,7 @@ class PreviewPhotoAdapter(private val context: Context, private val list: List<U
     private val lp: ViewGroup.LayoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
     private var currentItem: PhotoView? = null
     private var clickBlock: (View) -> Unit = { _ -> }
+    private var scaleBlock: () -> Unit = { }
 
     override fun isViewFromObject(view: View, obj: Any): Boolean = view === obj
 
@@ -27,6 +28,7 @@ class PreviewPhotoAdapter(private val context: Context, private val list: List<U
         } else {
             views.removeAt(0)
         }
+        view.setOnScaleChangeListener { _, _, _ -> scaleBlock() }
         container.addView(view, lp)
         view.setOnClickListener(clickBlock)
         val uri: Uri = list[position]
@@ -37,6 +39,10 @@ class PreviewPhotoAdapter(private val context: Context, private val list: List<U
 
     fun setClickListener(block: (view: View) -> Unit) {
         clickBlock = block
+    }
+
+    fun setScaleBlock(block: () -> Unit) {
+        scaleBlock = block
     }
 
     override fun destroyItem(container: ViewGroup, position: Int, obj: Any) {

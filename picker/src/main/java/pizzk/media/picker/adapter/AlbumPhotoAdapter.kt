@@ -1,6 +1,7 @@
 package pizzk.media.picker.adapter
 
 import android.content.Context
+import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
@@ -63,4 +64,12 @@ class AlbumPhotoAdapter(context: Context) : ListAdapter<AlbumItem>(context) {
     }
 
     fun getSelectList(): List<AlbumItem> = selectedList
+
+    fun updateSelectList(selects: List<AlbumItem>?) {
+        val list: List<AlbumItem> = selects ?: return
+        selectedList.clear()
+        selectedList.addAll(list)
+        notifyDataSetChanged()
+        selectBlock(getSelectList())
+    }
 }
