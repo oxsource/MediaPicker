@@ -9,24 +9,12 @@ import pizzk.media.picker.arch.MimeType
 
 class AlbumItem private constructor() {
     companion object {
-        private val cache: MutableList<AlbumItem> = ArrayList()
 
         fun obtain(cursor: Cursor): AlbumItem {
-            if (cache.isEmpty()) {
-                val item = AlbumItem()
-                item.cursor(cursor)
-                return item
-            }
-            val index = 0
-            val item: AlbumItem = cache[index]
-            item.cursor(cursor)
-            cache.removeAt(index)
-            return item
-        }
-
-        fun recycle(item: AlbumItem) {
+            val item = AlbumItem()
             item.clean()
-            cache.add(item)
+            item.cursor(cursor)
+            return item
         }
     }
 

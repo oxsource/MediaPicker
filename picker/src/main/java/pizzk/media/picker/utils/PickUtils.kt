@@ -128,7 +128,6 @@ object PickUtils {
                 val item: AlbumItem = AlbumItem.obtain(cursor)
                 val access: Boolean = PickControl.obtain().filter().invoke(item.getUri(), item.getMime())
                 if (!access) {
-                    AlbumItem.recycle(item)
                     continue
                 }
                 items.add(item)
