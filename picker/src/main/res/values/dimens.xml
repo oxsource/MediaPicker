@@ -22,6 +22,6 @@
     <dimen name="pick_photo_min_size">80dp</dimen>
     <dimen name="pick_photo_delete_margin_hor">10dp</dimen>
     <dimen name="pick_photo_delete_margin_ver">5dp</dimen>
-    <dimen name="pick_chose_bkg_radius">3dp</dimen>
+    <dimen name="pick_chose_bkg_radius">2dp</dimen>
     <dimen name="pick_chose_split_line">0.1dp</dimen>
 </resources>

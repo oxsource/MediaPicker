@@ -73,8 +73,8 @@ class AlbumActivity : AppCompatActivity() {
         //图片适配器
         photoAdapter = AlbumPhotoAdapter(baseContext)
         photoAdapter.setTapBlock { _, index ->
-            val uris: List<Uri> = photoAdapter.getList().mapNotNull(AlbumItem::getUri)
-            val selects: List<Uri> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri)
+            val uris: List<String> = photoAdapter.getList().mapNotNull(AlbumItem::getUri).map(Uri::toString)
+            val selects: List<String> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri).map(Uri::toString)
             PreviewActivity.show(this@AlbumActivity, uris, selects, index, selectLimit)
         }
         //目录适配器
@@ -154,9 +154,9 @@ class AlbumActivity : AppCompatActivity() {
                 changeOriginState()
             }
             tvPreview -> {
-                val uris: List<Uri> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri)
+                val uris: List<String> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri).map(Uri::toString)
                 if (uris.isNotEmpty()) {
-                    val selects: List<Uri> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri)
+                    val selects: List<String> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri).map(Uri::toString)
                     PreviewActivity.show(this@AlbumActivity, uris, selects, 0, selectLimit)
                 }
             }

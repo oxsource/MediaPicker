@@ -1,7 +1,6 @@
 package pizzk.media.picker.adapter
 
 import android.content.Context
-import android.net.Uri
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
@@ -13,9 +12,9 @@ import pizzk.media.picker.utils.PickUtils
 /**
  * 预览选适配器
  */
-class PreviewSelectAdapter(context: Context, list: List<Uri>) : PickListAdapter<Uri>(context) {
+class PreviewSelectAdapter(context: Context, list: List<String>) : CommonListAdapter<String>(context) {
     private var sameIndex: Int = -1
-    private var clickBlock: (Uri) -> Unit = { _ -> }
+    private var clickBlock: (String) -> Unit = { _ -> }
     private val marginRight: Int by lazy {
         context.resources.getDimensionPixelOffset(R.dimen.album_preview_select_item_padding)
     }
@@ -27,13 +26,13 @@ class PreviewSelectAdapter(context: Context, list: List<Uri>) : PickListAdapter<
     override fun getLayoutId(viewType: Int) = R.layout.preview_select_item
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val uri: Uri = getList()[position]
+        val path: String = getList()[position]
         holder.itemView.setOnClickListener {
-            clickBlock(uri)
+            clickBlock(path)
         }
         val photo: ImageView = holder.getView(R.id.iv)!!
-        val mime: String = PickUtils.getImageMime(context, uri)
-        PickControl.imageLoad().load(photo, uri, mime)
+        val mime: String = PickUtils.getImageMime(context, path)
+        PickControl.imageLoad().load(photo, path, mime)
         val vi: Int = if (position == sameIndex) View.VISIBLE else View.GONE
         holder.setVisibility(R.id.mask, vi)
         val isLast: Boolean = position == itemCount - 1
@@ -41,11 +40,11 @@ class PreviewSelectAdapter(context: Context, list: List<Uri>) : PickListAdapter<
         lp.rightMargin = if (isLast) marginRight else 0
     }
 
-    fun setClickListener(block: (Uri) -> Unit) {
+    fun setClickListener(block: (String) -> Unit) {
         this.clickBlock = block
     }
 
-    fun onPreviewChanged(uri: Uri?,view:RecyclerView): Boolean {
+    fun onPreviewChanged(uri: String?, view: RecyclerView): Boolean {
         val lastIndex: Int = sameIndex
         sameIndex = -1
         uri?.let {

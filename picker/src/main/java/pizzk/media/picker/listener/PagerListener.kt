@@ -1,4 +1,4 @@
-package pizzk.media.picker.adapter
+package pizzk.media.picker.listener
 
 import android.support.v4.view.ViewPager
 

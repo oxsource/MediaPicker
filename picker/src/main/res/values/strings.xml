@@ -15,4 +15,6 @@
     <string name="pick_media_finish">完成</string>
     <string name="pick_media_finish_format">完成(%1$d/%2$d)</string>
     <string name="pick_media_select">选择</string>
+    <string name="pick_chose_camera">拍照</string>
+    <string name="pick_chose_album">相册</string>
 </resources>

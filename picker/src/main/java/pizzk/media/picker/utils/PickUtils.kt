@@ -27,6 +27,9 @@ import pizzk.media.picker.entity.AlbumSection
 import pizzk.media.picker.view.AlbumActivity
 import pizzk.media.picker.view.PreviewActivity
 import java.io.File
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
+
 
 /**
  * 系统工具类
@@ -82,7 +85,7 @@ object PickUtils {
         }
         if (!access) return
         val picker: PickControl = PickControl.obtain(false)
-        val uris: List<Uri> = picker.selects()
+        val uris: List<Uri> = picker.selects().mapNotNull(PickUtils::parsePath)
         val limit: Int = picker.limit()
         AlbumActivity.show(activity, limit, uris)
     }
@@ -109,11 +112,11 @@ object PickUtils {
         intent.action = MediaStore.ACTION_IMAGE_CAPTURE
         intent.addCategory(Intent.CATEGORY_DEFAULT)
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        val outUri: Uri = FileProvider.getUriForFile(activity, PickControl.authority(), file)
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, outUri)
+        val uri: Uri = FileProvider.getUriForFile(activity, PickControl.authority(), file)
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
         activity.startActivityForResult(intent, PickUtils.REQUEST_CODE_CAMERA)
-        PickControl.obtain(false).cameraUri(outUri)
-        return outUri
+        PickControl.obtain(false).cameraFile(file)
+        return uri
     }
 
     /**
@@ -121,7 +124,7 @@ object PickUtils {
      */
     fun launchPreview(activity: AppCompatActivity) {
         val picker: PickControl = PickControl.obtain(false)
-        val uris: List<Uri> = picker.selects()
+        val uris: List<String> = picker.selects()
         val index: Int = picker.index()
         val selectLimit = 0
         PreviewActivity.show(activity, uris, uris, index, selectLimit)
@@ -159,7 +162,7 @@ object PickUtils {
         }
         val file: File = optionalFile ?: return null
         //开始裁剪
-        val outUri: Uri = FileProvider.getUriForFile(activity, PickControl.authority(), file)
+        val destUri: Uri = FileProvider.getUriForFile(activity, PickControl.authority(), file)
         val intent = Intent("com.android.camera.action.CROP")
         intent.setDataAndType(srcUri, "image/*")
         intent.putExtra("crop", "true")
@@ -176,18 +179,18 @@ object PickUtils {
             intent.putExtra("outputY", params.outputY)
         }
         intent.putExtra("return-data", false)
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, outUri)
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, destUri)
         intent.putExtra("outputFormat", params.getFormatPlain())
         //相关应用授权
         val resolves: List<ResolveInfo> = activity.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
         val grantFlag: Int = Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
         for (info: ResolveInfo in resolves) {
             val packageName: String = info.activityInfo.packageName
-            activity.grantUriPermission(packageName, outUri, grantFlag)
+            activity.grantUriPermission(packageName, destUri, grantFlag)
         }
         activity.startActivityForResult(intent, PickUtils.REQUEST_CODE_CROP)
-        PickControl.obtain(false).cropUri(outUri)
-        return outUri
+        PickControl.obtain(false).cropFile(file)
+        return destUri
     }
 
     /**
@@ -232,6 +235,24 @@ object PickUtils {
         return sections
     }
 
+    //将图像保存至系统相册
+    fun saveToAlbum(context: Context, file: File, block: (Uri) -> Unit) {
+        doAsync {
+            val fileUri: Uri = Uri.fromFile(file)
+            val uri: Uri = try {
+                val uriPath: String = MediaStore.Images.Media.insertImage(context.contentResolver, file.absolutePath, file.name, "")
+                context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, fileUri))
+                Uri.parse(uriPath)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                fileUri
+            }
+            uiThread {
+                block(uri)
+            }
+        }
+    }
+
     //获取图片的Mime
     fun getImageMime(context: Context, uri: Uri): String {
         val projection: Array<String> = arrayOf(MediaStore.Images.Media.MIME_TYPE)
@@ -250,8 +271,15 @@ object PickUtils {
 
     //通过path获取Uri
     fun parsePath(path: String): Uri? {
+        val uri: Uri? = try {
+            Uri.parse(path)
+        } catch (e: Exception) {
+            null
+        }
+        if (null != uri) return uri
         return try {
-            Uri.parse(path) ?: Uri.fromFile(File(path))
+            val file = File(path)
+            if (file.exists()) Uri.fromFile(file) else null
         } catch (e: Exception) {
             null
         }

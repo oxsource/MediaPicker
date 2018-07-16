@@ -6,6 +6,7 @@ import android.net.Uri
 import android.support.annotation.IntDef
 import pizzk.media.picker.utils.ImageLoadImpl
 import pizzk.media.picker.view.PickActivity
+import java.io.File
 
 /**
  * 拾取控制器
@@ -27,7 +28,7 @@ class PickControl private constructor() {
 
         //默认函数块
         private val dFilter: (Uri?, String) -> Boolean = { _, _ -> true }
-        private val dCallback: (List<Uri>) -> Unit = { _ -> Unit }
+        private val dCallback: (action: Int, List<Uri>) -> Unit = { _, _ -> Unit }
 
         private val picker: PickControl = PickControl()
 
@@ -45,15 +46,16 @@ class PickControl private constructor() {
     private var action: Int = ACTION_NONE
     private var filter: (Uri?, String) -> Boolean = dFilter
     private var limit: Int = 1
-    private var callback: (List<Uri>) -> Unit = dCallback
+    private var callback: (action: Int, List<Uri>) -> Unit = dCallback
     //裁剪
     private var crop: CropParams? = null
-    private var cropUri: Uri? = null
+    private var cropFile: File? = null
+
     //选中数据
-    private var selects: List<Uri> = emptyList()
+    private var selects: List<String> = emptyList()
     private var index: Int = 0
     //拍照
-    private var cameraUri: Uri? = null
+    private var cameraFile: File? = null
 
     /**
      * 重置配置属性
@@ -66,8 +68,8 @@ class PickControl private constructor() {
         callback = dCallback
         selects = emptyList()
         index = 0
-        cropUri = null
-        cameraUri = null
+        cropFile = null
+        cameraFile = null
         return this
     }
 
@@ -98,7 +100,7 @@ class PickControl private constructor() {
     /**
      * 设置已经选择的数据
      */
-    fun selects(values: List<Uri>): PickControl {
+    fun selects(values: List<String>): PickControl {
         this.selects = values
         return this
     }
@@ -122,7 +124,7 @@ class PickControl private constructor() {
     /**
      * 设置拾取回调
      */
-    fun callback(block: (uris: List<Uri>) -> Unit): PickControl {
+    fun callback(block: (action: Int, uris: List<Uri>) -> Unit): PickControl {
         this.callback = block
         return this
     }
@@ -156,12 +158,12 @@ class PickControl private constructor() {
     /**
      * 获取回调函数
      */
-    internal fun callbacks(): (List<Uri>) -> Unit = callback
+    internal fun callbacks(): (action: Int, uris: List<Uri>) -> Unit = callback
 
     /**
      * 获预选择图片路径
      */
-    internal fun selects(): List<Uri> = selects
+    internal fun selects(): List<String> = selects
 
     /**
      * 获取图片默认索引
@@ -169,26 +171,26 @@ class PickControl private constructor() {
     internal fun index(): Int = index
 
     /**
-     * 获取拍照Uri
+     * 获取拍照File
      */
-    internal fun cameraUri(): Uri? = cameraUri
+    internal fun cameraFile(): File? = cameraFile
 
     /**
-     * 暂存拍照Uri
+     * 暂存拍照File
      */
-    internal fun cameraUri(uri: Uri?) {
-        cameraUri = uri
+    internal fun cameraFile(file: File?) {
+        cameraFile = file
     }
 
     /**
-     * 获取裁切Uri
+     * 获取裁切File
      */
-    internal fun cropUri(): Uri? = cropUri
+    internal fun cropFile(): File? = cropFile
 
     /**
-     * 暂存裁切Uri
+     * 暂存裁切File
      */
-    internal fun cropUri(uri: Uri?) {
-        cropUri = uri
+    internal fun cropFile(file: File?) {
+        cropFile = file
     }
 }

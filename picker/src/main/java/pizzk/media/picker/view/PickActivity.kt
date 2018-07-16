@@ -6,10 +6,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.widget.Toast
 import pizzk.media.picker.R
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.utils.PickUtils
+import java.io.File
 
 class PickActivity : AppCompatActivity() {
     companion object {
@@ -58,7 +58,7 @@ class PickActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (Activity.RESULT_CANCELED == resultCode) {
-            showToast(getString(R.string.pick_media_user_cancel))
+            Log.d(TAG, getString(R.string.pick_media_user_cancel))
             finish()
             return
         }
@@ -69,15 +69,17 @@ class PickActivity : AppCompatActivity() {
         val picker: PickControl = PickControl.obtain(false)
         when (requestCode) {
             PickUtils.REQUEST_CODE_CAMERA -> {
-                val uri: Uri? = PickControl.obtain(false).cameraUri()
-                if (null != uri) {
+                val file: File? = PickControl.obtain(false).cameraFile()
+                if (null != file) {
                     if (null != picker.crop() && picker.limit() == 1) {
                         //选择单张图片且需要裁剪
-                        picker.crop()!!.uri = uri
+                        picker.crop()!!.uri = Uri.fromFile(file)
                         PickUtils.launchCrop(this@PickActivity)
                         return
                     } else {
-                        picker.callbacks().invoke(listOf(uri))
+                        PickUtils.saveToAlbum(baseContext, file) {
+                            picker.callbacks().invoke(picker.action(), listOf(it))
+                        }
                     }
                 }
                 finish()
@@ -90,7 +92,7 @@ class PickActivity : AppCompatActivity() {
                     PickUtils.launchCrop(this@PickActivity)
                     return
                 } else {
-                    picker.callbacks().invoke(uris)
+                    picker.callbacks().invoke(picker.action(), uris)
                 }
                 finish()
             }
@@ -98,17 +100,14 @@ class PickActivity : AppCompatActivity() {
                 finish()
             }
             PickUtils.REQUEST_CODE_CROP -> {
-                val uri: Uri? = PickControl.obtain(false).cropUri()
-                if (null != uri) {
-                    PickControl.obtain(false).callbacks().invoke(listOf(uri))
+                val file: File? = PickControl.obtain(false).cropFile()
+                if (null != file) {
+                    PickUtils.saveToAlbum(baseContext, file) {
+                        PickControl.obtain(false).callbacks().invoke(picker.action(), listOf(it))
+                    }
                 }
                 finish()
             }
         }
-    }
-
-
-    private fun showToast(text: String) {
-        Toast.makeText(PickActivity@ this, text, Toast.LENGTH_SHORT).show()
     }
 }

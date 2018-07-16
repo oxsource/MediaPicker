@@ -8,7 +8,7 @@ import pizzk.media.picker.R
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.entity.AlbumItem
 
-class AlbumPhotoAdapter(context: Context) : PickListAdapter<AlbumItem>(context) {
+class AlbumPhotoAdapter(context: Context) : CommonListAdapter<AlbumItem>(context) {
     private val selectedList: MutableList<AlbumItem> = ArrayList()
     private var selectBlock: (List<AlbumItem>) -> Unit = { _ -> }
 

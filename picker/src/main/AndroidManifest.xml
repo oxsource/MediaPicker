@@ -10,17 +10,21 @@
             android:name=".view.PickActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".view.AlbumActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".view.PreviewActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
+
         <activity
-            android:name=".view.CropActivity"
+            android:name=".view.PickChoseActivity"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/PickTranslucentActivity" />
     </application>
 </manifest>

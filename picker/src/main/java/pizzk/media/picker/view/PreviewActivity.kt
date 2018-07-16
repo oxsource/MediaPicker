@@ -18,11 +18,13 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Toast
 import pizzk.media.picker.R
-import pizzk.media.picker.adapter.PagerListener
+import pizzk.media.picker.listener.PagerListener
 import pizzk.media.picker.adapter.PreviewPhotoAdapter
 import pizzk.media.picker.adapter.PreviewSelectAdapter
 import pizzk.media.picker.listener.SimpleAnimationListener
 import pizzk.media.picker.utils.PickUtils
+import java.net.URI
+import java.net.URL
 
 
 class PreviewActivity : AppCompatActivity() {
@@ -32,14 +34,17 @@ class PreviewActivity : AppCompatActivity() {
         private const val KEY_SELECT_LIMIT: String = "key_select_limit"
         private const val KEY_SELECT_DATA: String = "key_select_data"
 
-        internal fun show(activity: Activity?, all: List<Uri>, selects: List<Uri>, index: Int, selectLimit: Int = 0) {
+        internal fun show(activity: Activity?, all: List<String>, selects: List<String>, index: Int, selectLimit: Int = 0) {
             val context: Activity = activity ?: return
             val intent = Intent(context, PreviewActivity::class.java)
-            intent.putParcelableArrayListExtra(KEY_DATA, ArrayList(all))
+            intent.putStringArrayListExtra(KEY_DATA, ArrayList(all))
             intent.putExtra(KEY_INDEX, index)
             intent.putExtra(KEY_SELECT_LIMIT, selectLimit)
-            intent.putParcelableArrayListExtra(KEY_SELECT_DATA, ArrayList(selects))
+            intent.putStringArrayListExtra(KEY_SELECT_DATA, ArrayList(selects))
             context.startActivityForResult(intent, PickUtils.REQUEST_CODE_PREVIEW)
+
+            val url = URL("http://www.baidu.com")
+            val uri: URI = url.toURI()
         }
     }
 
@@ -73,7 +78,7 @@ class PreviewActivity : AppCompatActivity() {
 
     //设置适配器
     private fun setupAdapter() {
-        val photos: List<Uri> = intent.getParcelableArrayListExtra(PreviewActivity.KEY_DATA)
+        val photos: List<String> = intent.getStringArrayListExtra(PreviewActivity.KEY_DATA)
         //预览相关
         currentIndex = intent.getIntExtra(PreviewActivity.KEY_INDEX, currentIndex)
         photoAdapter = PreviewPhotoAdapter(baseContext, photos)
@@ -85,19 +90,20 @@ class PreviewActivity : AppCompatActivity() {
         }
         //选择相关
         selectLimit = intent.getIntExtra(PreviewActivity.KEY_SELECT_LIMIT, selectLimit)
-        val selects: List<Uri> = intent.getParcelableArrayListExtra(PreviewActivity.KEY_SELECT_DATA)
+        val selects: List<String> = intent.getStringArrayListExtra(PreviewActivity.KEY_SELECT_DATA)
         selectAdapter = PreviewSelectAdapter(baseContext, selects)
         selectAdapter.setClickListener {
-            val uri: Uri = it
-            val targetUri: Uri? = photoAdapter.getList().findLast { it == uri }
-            val selectIndex: Int = targetUri?.let { photoAdapter.getList().indexOf(it) } ?: -1
+            val path: String = it
+            val targetPath: String? = photoAdapter.getList().findLast { it == path }
+            val selectIndex: Int = targetPath?.let { photoAdapter.getList().indexOf(it) } ?: -1
             if (selectIndex < 0) return@setClickListener
             setCurrentIndex(selectIndex, true)
         }
     }
 
     override fun finish() {
-        PickUtils.setResult(this@PreviewActivity, selectAdapter.getList(), finishFlag, false)
+        val uris: List<Uri>? = if (selectLimit > 0) selectAdapter.getList().mapNotNull(Uri::parse) else null
+        PickUtils.setResult(this@PreviewActivity, uris, finishFlag, false)
         super.finish()
     }
 
@@ -135,10 +141,10 @@ class PreviewActivity : AppCompatActivity() {
                 Toast.makeText(baseContext, content, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val uri: Uri = photoAdapter.getList()[currentIndex]
-            val select: Boolean = !selectAdapter.getList().contains(uri)
+            val path: String = photoAdapter.getList()[currentIndex]
+            val select: Boolean = !selectAdapter.getList().contains(path)
             switchSelectBox(select, currentIndex)
-            selectAdapter.onPreviewChanged(uri, selectedView)
+            selectAdapter.onPreviewChanged(path, selectedView)
         }
         //选中列表
         selectedView = findViewById(R.id.selectRecycleView)
@@ -216,15 +222,15 @@ class PreviewActivity : AppCompatActivity() {
     //切换选择状态
     private fun switchSelectBox(value: Boolean, index: Int) {
         checkBox.setImageResource(if (value) R.drawable.album_check_active else R.drawable.album_check_normal)
-        val uri: Uri = photoAdapter.getList()[index]
-        val contain: Boolean = selectAdapter.getList().contains(uri)
+        val path: String = photoAdapter.getList()[index]
+        val contain: Boolean = selectAdapter.getList().contains(path)
         if (value) {
-            if (!contain && selectAdapter.getList().add(uri)) {
+            if (!contain && selectAdapter.getList().add(path)) {
                 notifyBottomChanged(true)
                 selectAdapter.notifyDataSetChanged()
             }
         } else {
-            if (contain && selectAdapter.getList().remove(uri)) {
+            if (contain && selectAdapter.getList().remove(path)) {
                 notifyBottomChanged(true)
                 selectAdapter.notifyDataSetChanged()
             }

@@ -1,7 +1,6 @@
 package pizzk.media.picker.adapter
 
 import android.content.Context
-import android.net.Uri
 import android.support.v4.view.PagerAdapter
 import android.view.View
 import android.view.ViewGroup
@@ -9,7 +8,7 @@ import com.github.chrisbanes.photoview.PhotoView
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.utils.PickUtils
 
-class PreviewPhotoAdapter(private val context: Context, private val list: List<Uri>) : PagerAdapter() {
+class PreviewPhotoAdapter(private val context: Context, private val list: List<String>) : PagerAdapter() {
     private val views: MutableList<PhotoView> = ArrayList(5)
     private val lp: ViewGroup.LayoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
     private var currentItem: PhotoView? = null
@@ -29,9 +28,9 @@ class PreviewPhotoAdapter(private val context: Context, private val list: List<U
         view.setOnScaleChangeListener { _, _, _ -> scaleBlock() }
         container.addView(view, lp)
         view.setOnClickListener(clickBlock)
-        val uri: Uri = list[position]
-        val mime: String = PickUtils.getImageMime(context, uri)
-        PickControl.imageLoad().load(view, uri, mime)
+        val path: String = list[position]
+        val mime: String = PickUtils.getImageMime(context, path)
+        PickControl.imageLoad().load(view, path, mime)
         return view
     }
 
@@ -56,5 +55,5 @@ class PreviewPhotoAdapter(private val context: Context, private val list: List<U
 
     fun getPrimaryItem(): PhotoView? = currentItem
 
-    fun getList(): List<Uri> = list
+    fun getList(): List<String> = list
 }

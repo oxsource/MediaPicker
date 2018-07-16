@@ -11,12 +11,12 @@ import pizzk.media.picker.entity.PhotoItem
 import pizzk.media.picker.utils.PickUtils
 import kotlin.math.min
 
-class PickPhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewGroup.LayoutParams)
-    : PickListAdapter<PhotoItem>(context) {
+class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewGroup.LayoutParams)
+    : CommonListAdapter<PhotoItem>(context) {
 
     val isAppend: Boolean
     private val lp: ViewGroup.LayoutParams
-    private var changeBlock: (PickPhotoGroupAdapter) -> Unit = { _ -> }
+    private var changeBlock: (PhotoGroupAdapter) -> Unit = { _ -> }
 
     init {
         if (null == fixedList || fixedList.isEmpty()) {
@@ -30,7 +30,7 @@ class PickPhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: V
     }
 
 
-    fun setChangeBlock(block: (PickPhotoGroupAdapter) -> Unit) {
+    fun setChangeBlock(block: (PhotoGroupAdapter) -> Unit) {
         this.changeBlock = block
     }
 
