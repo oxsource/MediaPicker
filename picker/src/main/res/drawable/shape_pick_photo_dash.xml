@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#ffffffff"/>
+    <stroke
+        android:width="@dimen/pick_photo_split_line"
+        android:color="@color/pick_photo_dash_line"
+        android:dashGap="@dimen/pick_photo_dash_gap"
+        android:dashWidth="@dimen/pick_photo_dash_gap_width"/>
+</shape>

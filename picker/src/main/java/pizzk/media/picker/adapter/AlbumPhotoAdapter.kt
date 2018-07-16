@@ -1,7 +1,6 @@
 package pizzk.media.picker.adapter
 
 import android.content.Context
-import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
@@ -9,7 +8,7 @@ import pizzk.media.picker.R
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.entity.AlbumItem
 
-class AlbumPhotoAdapter(context: Context) : ListAdapter<AlbumItem>(context) {
+class AlbumPhotoAdapter(context: Context) : PickListAdapter<AlbumItem>(context) {
     private val selectedList: MutableList<AlbumItem> = ArrayList()
     private var selectBlock: (List<AlbumItem>) -> Unit = { _ -> }
 
@@ -34,7 +33,7 @@ class AlbumPhotoAdapter(context: Context) : ListAdapter<AlbumItem>(context) {
                 selectBlock(getSelectList())
                 return@setOnClickListener
             }
-            val limit: Int = PickControl.obtain().limit()
+            val limit: Int = PickControl.obtain(false).limit()
             if (selectedList.size >= limit) {
                 val hint: String = context.getString(R.string.pick_media_most_select_limit)
                 val content: String = String.format(hint, limit)

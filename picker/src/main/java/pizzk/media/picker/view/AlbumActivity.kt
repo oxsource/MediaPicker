@@ -27,11 +27,13 @@ import pizzk.media.picker.utils.PickUtils
  */
 class AlbumActivity : AppCompatActivity() {
     companion object {
+        private const val KEY_SELECT_DATA: String = "key_select_data"
         private const val KEY_SELECT_LIMIT: String = "key_select_limit"
 
-        fun show(activity: Activity, limit: Int) {
+        fun show(activity: Activity, limit: Int, selects: List<Uri>) {
             val intent = Intent(activity, AlbumActivity::class.java)
             intent.putExtra(KEY_SELECT_LIMIT, limit)
+            intent.putParcelableArrayListExtra(KEY_SELECT_DATA, ArrayList(selects))
             activity.startActivityForResult(intent, PickUtils.REQUEST_CODE_ALBUM)
         }
     }
@@ -67,9 +69,9 @@ class AlbumActivity : AppCompatActivity() {
     //初始化适配器
     private fun setupAdapter() {
         selectLimit = intent.getIntExtra(KEY_SELECT_LIMIT, selectLimit)
+        val selectUris: List<Uri> = intent.getParcelableArrayListExtra(KEY_SELECT_DATA)
         //图片适配器
         photoAdapter = AlbumPhotoAdapter(baseContext)
-        photoAdapter.setSelectBlock(::onSelectChanged)
         photoAdapter.setTapBlock { _, index ->
             val uris: List<Uri> = photoAdapter.getList().mapNotNull(AlbumItem::getUri)
             val selects: List<Uri> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri)
@@ -92,7 +94,13 @@ class AlbumActivity : AppCompatActivity() {
             photoAdapter.notifyDataSetChanged()
         }
         //初始化数据
-        photoAdapter.append(sectionAdapter.getAlbumsBySectionIndex(0), true)
+        val allItems: List<AlbumItem> = sectionAdapter.getAlbumsBySectionIndex(0)
+        photoAdapter.append(allItems, true)
+        val selects: List<AlbumItem> = selectUris.map {
+            val uri: Uri = it
+            return@map allItems.findLast { it.getUri() == uri }
+        }.filterNotNull()
+        photoAdapter.updateSelectList(selects)
     }
 
 
@@ -131,6 +139,7 @@ class AlbumActivity : AppCompatActivity() {
         sectionsView.layoutManager = LinearLayoutManager(baseContext)
         sectionsView.adapter = sectionAdapter
         //选中状态调整
+        photoAdapter.setSelectBlock(::onSelectChanged)
         onSelectChanged(photoAdapter.getSelectList())
     }
 

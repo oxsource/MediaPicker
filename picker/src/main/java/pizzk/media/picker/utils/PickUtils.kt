@@ -81,7 +81,10 @@ object PickUtils {
             activity.finish()
         }
         if (!access) return
-        AlbumActivity.show(activity, PickControl.obtain().limit())
+        val picker: PickControl = PickControl.obtain(false)
+        val uris: List<Uri> = picker.selects()
+        val limit: Int = picker.limit()
+        AlbumActivity.show(activity, limit, uris)
     }
 
     /**
@@ -109,7 +112,7 @@ object PickUtils {
         val outUri: Uri = FileProvider.getUriForFile(activity, PickControl.authority(), file)
         intent.putExtra(MediaStore.EXTRA_OUTPUT, outUri)
         activity.startActivityForResult(intent, PickUtils.REQUEST_CODE_CAMERA)
-        PickControl.obtain().cameraUri(outUri)
+        PickControl.obtain(false).cameraUri(outUri)
         return outUri
     }
 
@@ -117,18 +120,18 @@ object PickUtils {
      * 启动预览
      */
     fun launchPreview(activity: AppCompatActivity) {
-        val picker: PickControl = PickControl.obtain()
-        val uris: List<Uri> = picker.previews()
-        val previewIndex: Int = picker.previewsIndex()
+        val picker: PickControl = PickControl.obtain(false)
+        val uris: List<Uri> = picker.selects()
+        val index: Int = picker.index()
         val selectLimit = 0
-        PreviewActivity.show(activity, uris, uris, previewIndex, selectLimit)
+        PreviewActivity.show(activity, uris, uris, index, selectLimit)
     }
 
     /**
      * 启动裁剪
      */
     fun launchCrop(activity: AppCompatActivity): Uri? {
-        val cropParams: CropParams? = PickControl.obtain().crop()
+        val cropParams: CropParams? = PickControl.obtain(false).crop()
         //检查裁切参数
         if (null == cropParams) {
             Log.d(activity::class.java.simpleName, "please special crop params")
@@ -183,7 +186,7 @@ object PickUtils {
             activity.grantUriPermission(packageName, outUri, grantFlag)
         }
         activity.startActivityForResult(intent, PickUtils.REQUEST_CODE_CROP)
-        PickControl.obtain().cropUri(outUri)
+        PickControl.obtain(false).cropUri(outUri)
         return outUri
     }
 
@@ -207,7 +210,7 @@ object PickUtils {
             for (i: Int in 0 until cursor.count) {
                 if (!cursor.moveToPosition(i)) break
                 val item: AlbumItem = AlbumItem.obtain(cursor)
-                val access: Boolean = PickControl.obtain().filter().invoke(item.getUri(), item.getMime())
+                val access: Boolean = PickControl.obtain(false).filter().invoke(item.getUri(), item.getMime())
                 if (!access) {
                     continue
                 }
@@ -233,10 +236,35 @@ object PickUtils {
     fun getImageMime(context: Context, uri: Uri): String {
         val projection: Array<String> = arrayOf(MediaStore.Images.Media.MIME_TYPE)
         val resolver: ContentResolver = context.contentResolver
-        val cursor: Cursor = resolver.query(uri, projection, null, null, null)
-        val value: String = if (cursor.moveToFirst()) cursor.getString(0) else ""
-        cursor.close()
-        return value
+        var cursor: Cursor? = null
+        return try {
+            cursor = resolver.query(uri, projection, null, null, null)
+            if (cursor.moveToFirst()) cursor.getString(0) else ""
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ""
+        } finally {
+            cursor?.close()
+        }
+    }
+
+    //通过path获取Uri
+    fun parsePath(path: String): Uri? {
+        return try {
+            Uri.parse(path) ?: Uri.fromFile(File(path))
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    //获取图片的Mime
+    fun getImageMime(context: Context, path: String): String {
+        return try {
+            val uri: Uri = parsePath(path)!!
+            return PickUtils.getImageMime(context, uri)
+        } catch (e: Exception) {
+            MimeType.JPEG.mime
+        }
     }
 
     //隐藏状态栏

@@ -13,7 +13,7 @@ import pizzk.media.picker.utils.PickUtils
 /**
  * 预览选适配器
  */
-class PreviewSelectAdapter(context: Context, list: List<Uri>) : ListAdapter<Uri>(context) {
+class PreviewSelectAdapter(context: Context, list: List<Uri>) : PickListAdapter<Uri>(context) {
     private var sameIndex: Int = -1
     private var clickBlock: (Uri) -> Unit = { _ -> }
     private val marginRight: Int by lazy {

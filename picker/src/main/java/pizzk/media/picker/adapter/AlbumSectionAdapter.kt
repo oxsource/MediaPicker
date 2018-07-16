@@ -12,7 +12,7 @@ import pizzk.media.picker.utils.PickUtils
 /**
  * 相册目录适配器
  */
-class AlbumSectionAdapter(context: Context) : ListAdapter<AlbumSection>(context) {
+class AlbumSectionAdapter(context: Context) : PickListAdapter<AlbumSection>(context) {
 
     init {
         val sections: List<AlbumSection> = PickUtils.loadImages(context)

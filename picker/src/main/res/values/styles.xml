@@ -59,4 +59,14 @@
         <item name="android:src">@drawable/album_check_normal</item>
         <item name="android:visibility">visible</item>
     </style>
+
+    <style name="PickChoseText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:paddingLeft">15dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:textColor">@color/pick_chose_text_color</item>
+    </style>
 </resources>

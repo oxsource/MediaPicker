@@ -112,7 +112,7 @@ class PreviewActivity : AppCompatActivity() {
         }
         //标题栏
         toolbar = findViewById(R.id.toolbar)
-        toolbar.title = getString(R.string.pick_media_preview)
+        toolbar.title = ""
         toolbar.setNavigationOnClickListener { finish() }
         if (systemUiVisibility >= 0) {
             val lp: ViewGroup.MarginLayoutParams = toolbar.layoutParams as ViewGroup.MarginLayoutParams
@@ -122,7 +122,7 @@ class PreviewActivity : AppCompatActivity() {
             finishFlag = true
             finish()
         }
-        doneButton.item().setTitle(R.string.pick_media_finish)
+        doneButton.item().title = ""
         //底部菜单
         rlBottom = findViewById(R.id.rlBottom)
         checkBox = findViewById(R.id.check)

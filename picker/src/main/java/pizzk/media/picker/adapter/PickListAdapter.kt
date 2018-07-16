@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 
-abstract class ListAdapter<T>(protected val context: Context) : RecyclerView.Adapter<ViewHolder>() {
+abstract class PickListAdapter<T>(protected val context: Context) : RecyclerView.Adapter<ViewHolder>() {
     private val data: MutableList<T> = ArrayList()
     protected abstract fun getLayoutId(viewType: Int): Int
     //holder,index

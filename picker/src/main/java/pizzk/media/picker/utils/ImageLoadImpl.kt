@@ -19,7 +19,6 @@ object ImageLoadImpl : ImageLoad {
             }
             MimeType.BMP.mime -> {
                 val transOptions: BitmapTransitionOptions = BitmapTransitionOptions.withCrossFade()
-
                 Glide.with(context).asBitmap().load(value).transition(transOptions).into(view)
             }
             else -> {

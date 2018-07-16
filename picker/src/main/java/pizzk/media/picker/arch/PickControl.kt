@@ -31,7 +31,7 @@ class PickControl private constructor() {
 
         private val picker: PickControl = PickControl()
 
-        fun obtain(): PickControl = picker
+        fun obtain(clean: Boolean): PickControl = if (clean) picker.clean() else picker
 
         fun authority(value: String) {
             this.authority = value
@@ -49,9 +49,9 @@ class PickControl private constructor() {
     //裁剪
     private var crop: CropParams? = null
     private var cropUri: Uri? = null
-    //预览
-    private var previews: List<Uri> = emptyList()
-    private var previewsIndex: Int = 0
+    //选中数据
+    private var selects: List<Uri> = emptyList()
+    private var index: Int = 0
     //拍照
     private var cameraUri: Uri? = null
 
@@ -64,7 +64,10 @@ class PickControl private constructor() {
         crop = null
         limit = 1
         callback = dCallback
-        this.previews = emptyList()
+        selects = emptyList()
+        index = 0
+        cropUri = null
+        cameraUri = null
         return this
     }
 
@@ -93,6 +96,14 @@ class PickControl private constructor() {
     }
 
     /**
+     * 设置已经选择的数据
+     */
+    fun selects(values: List<Uri>): PickControl {
+        this.selects = values
+        return this
+    }
+
+    /**
      * 设置裁剪参数，选择多张图片时不支持裁剪
      */
     fun crop(crop: CropParams?): PickControl {
@@ -101,11 +112,10 @@ class PickControl private constructor() {
     }
 
     /**
-     * 设置预览图片数据
+     * 设置选中图片索引
      */
-    fun previews(values: List<Uri>, index: Int): PickControl {
-        this.previews = values
-        this.previewsIndex = index
+    fun index(index: Int): PickControl {
+        this.index = index
         return this
     }
 
@@ -149,14 +159,14 @@ class PickControl private constructor() {
     internal fun callbacks(): (List<Uri>) -> Unit = callback
 
     /**
-     * 获预览图片路径
+     * 获预选择图片路径
      */
-    internal fun previews(): List<Uri> = previews
+    internal fun selects(): List<Uri> = selects
 
     /**
-     * 获预览图片默认索引
+     * 获取图片默认索引
      */
-    internal fun previewsIndex(): Int = previewsIndex
+    internal fun index(): Int = index
 
     /**
      * 获取拍照Uri

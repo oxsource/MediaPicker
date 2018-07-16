@@ -19,7 +19,7 @@ class PickActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pick)
-        val picker: PickControl = PickControl.obtain()
+        val picker: PickControl = PickControl.obtain(false)
         when (picker.action()) {
             PickControl.ACTION_ALBUM -> {
                 PickUtils.launchAlbum(this@PickActivity)
@@ -66,10 +66,10 @@ class PickActivity : AppCompatActivity() {
             finish()
             return
         }
-        val picker: PickControl = PickControl.obtain()
+        val picker: PickControl = PickControl.obtain(false)
         when (requestCode) {
             PickUtils.REQUEST_CODE_CAMERA -> {
-                val uri: Uri? = PickControl.obtain().cameraUri()
+                val uri: Uri? = PickControl.obtain(false).cameraUri()
                 if (null != uri) {
                     if (null != picker.crop() && picker.limit() == 1) {
                         //选择单张图片且需要裁剪
@@ -98,9 +98,9 @@ class PickActivity : AppCompatActivity() {
                 finish()
             }
             PickUtils.REQUEST_CODE_CROP -> {
-                val uri: Uri? = PickControl.obtain().cropUri()
+                val uri: Uri? = PickControl.obtain(false).cropUri()
                 if (null != uri) {
-                    PickControl.obtain().callbacks().invoke(listOf(uri))
+                    PickControl.obtain(false).callbacks().invoke(listOf(uri))
                 }
                 finish()
             }
