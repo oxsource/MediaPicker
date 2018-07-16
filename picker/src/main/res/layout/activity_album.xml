@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/album_item_background"
-    android:orientation="vertical">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/album_item_background"
+                android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         style="@style/PickToolbar"
-        app:theme="@style/PickToolbarTheme" />
+        app:theme="@style/PickToolbarTheme"/>
 
     <View
         android:id="@+id/vTopLine"
         style="@style/AlbumSplitLine"
-        android:layout_below="@+id/toolbar" />
+        android:layout_below="@+id/toolbar"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/photoRecycleView"
@@ -22,12 +22,12 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/vBottomLine"
         android:layout_below="@+id/vTopLine"
-        android:overScrollMode="never" />
+        android:overScrollMode="never"/>
 
     <View
         android:id="@+id/vBottomLine"
         style="@style/AlbumSplitLine"
-        android:layout_above="@+id/rlBottom" />
+        android:layout_above="@+id/rlBottom"/>
 
     <RelativeLayout
         android:id="@+id/sectionMask"
@@ -50,7 +50,7 @@
             android:layout_alignParentBottom="true"
             android:background="@drawable/album_section_shape"
             android:overScrollMode="never"
-            android:paddingTop="@dimen/album_section_top_radius" />
+            android:paddingTop="@dimen/album_section_top_radius"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -65,7 +65,7 @@
             style="@style/BottomToolText"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:text="@string/pick_media_all_picture" />
+            android:text="@string/pick_media_all_picture"/>
 
         <LinearLayout
             android:id="@+id/llCenter"
@@ -79,14 +79,14 @@
                 android:layout_width="@dimen/pick_radio_size"
                 android:layout_height="@dimen/pick_radio_size"
                 android:layout_gravity="center_vertical"
-                android:background="@drawable/pick_radio_checked" />
+                android:background="@drawable/pick_radio_checked"/>
 
             <TextView
                 android:id="@+id/tvCenter"
                 style="@style/BottomToolText"
                 android:paddingLeft="@dimen/pick_radio_margin"
                 android:paddingRight="0dp"
-                android:text="@string/pick_media_origin_picture" />
+                android:text="@string/pick_media_origin_picture"/>
         </LinearLayout>
 
 
@@ -95,6 +95,6 @@
             style="@style/BottomToolText"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:text="@string/pick_media_preview" />
+            android:text="@string/pick_media_preview"/>
     </RelativeLayout>
 </RelativeLayout>

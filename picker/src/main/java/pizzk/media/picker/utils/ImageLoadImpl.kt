@@ -14,13 +14,17 @@ object ImageLoadImpl : ImageLoad {
         val context: Context = view.context
         when (mime) {
             MimeType.GIF.mime -> {
-                Glide.with(context).asGif().load(value).transition(DrawableTransitionOptions.withCrossFade()).into(view)
+                val transOptions: DrawableTransitionOptions = DrawableTransitionOptions.withCrossFade()
+                Glide.with(context).asGif().load(value).transition(transOptions).into(view)
             }
             MimeType.BMP.mime -> {
-                Glide.with(context).asBitmap().load(value).transition(BitmapTransitionOptions.withCrossFade()).into(view)
+                val transOptions: BitmapTransitionOptions = BitmapTransitionOptions.withCrossFade()
+
+                Glide.with(context).asBitmap().load(value).transition(transOptions).into(view)
             }
             else -> {
-                Glide.with(context).load(value).transition(DrawableTransitionOptions.withCrossFade()).into(view)
+                val transOptions: DrawableTransitionOptions = DrawableTransitionOptions.withCrossFade()
+                Glide.with(context).load(value).transition(transOptions).into(view)
             }
         }
     }

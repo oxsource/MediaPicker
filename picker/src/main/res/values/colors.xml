@@ -4,6 +4,7 @@
     <color name="album_item_image">#393a3f</color>
     <color name="album_item_mask">#66000000</color>
     <color name="album_item_check">#5bb72d</color>
+    <color name="album_item_check_disable">#438622</color>
     <color name="album_item_uncheck">#ffffff</color>
     <color name="pick_accent_color">#303135</color>
     <color name="pick_accent_light_color">#505156</color>

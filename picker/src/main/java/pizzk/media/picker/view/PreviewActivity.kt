@@ -1,7 +1,6 @@
 package pizzk.media.picker.view
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -10,7 +9,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
@@ -61,8 +59,7 @@ class PreviewActivity : AppCompatActivity() {
     private lateinit var selectedView: RecyclerView
     private lateinit var llSelect: LinearLayout
     private lateinit var checkBox: ImageView
-    //标题菜单
-    private lateinit var commitMenu: MenuItem
+    private lateinit var doneButton: PickActionMenu
     //动画
     private val hideOverlayAnim: AlphaAnimation = AlphaAnimation(1f, 0f)
     private val showOverlayAnim: AlphaAnimation = AlphaAnimation(0f, 1f)
@@ -134,13 +131,11 @@ class PreviewActivity : AppCompatActivity() {
             val lp: ViewGroup.MarginLayoutParams = toolbar.layoutParams as ViewGroup.MarginLayoutParams
             lp.topMargin = PickUtils.getStatusBarHeight(baseContext)
         }
-        commitMenu = toolbar.menu.add(R.string.pick_media_finish)
-        commitMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-        commitMenu.setOnMenuItemClickListener {
+        doneButton = PickActionMenu(toolbar) {
             finishFlag = true
             finish()
-            return@setOnMenuItemClickListener true
         }
+        doneButton.item().setTitle(R.string.pick_media_finish)
         //底部菜单
         rlBottom = findViewById(R.id.rlBottom)
         checkBox = findViewById(R.id.check)
@@ -194,14 +189,14 @@ class PreviewActivity : AppCompatActivity() {
     }
 
     //设置当前选中索引
-    private fun setCurrentIndex(index: Int, move: Boolean) {
+    private fun setCurrentIndex(index: Int, adjust: Boolean) {
         toolbar.title = "${index + 1}/${photoAdapter.count}"
         val select: Boolean = selectAdapter.onPreviewChanged(photoAdapter.getList()[index], selectedView)
         switchSelectBox(select, index)
         photoAdapter.getPrimaryItem()?.let { if (it.scale != 1.0f) it.scale = 1.0f }
-        if (move) {
-            photosView.setCurrentItem(index, false)
-        }
+        if (!adjust) return
+        val smooth = false
+        photosView.setCurrentItem(index, smooth)
     }
 
     //切换显示、隐藏标题等界面
@@ -250,16 +245,17 @@ class PreviewActivity : AppCompatActivity() {
         }
         //标题菜单显示空时
         if (selectAdapter.getList().isEmpty()) {
-            commitMenu.setTitle(R.string.pick_media_finish)
-            commitMenu.isEnabled = !selectMode
+            doneButton.item().setTitle(R.string.pick_media_finish)
+            doneButton.enable(!selectMode)
         } else {
             if (selectMode) {
                 val selectCount: Int = selectAdapter.getList().size
                 val limit: Int = PickControl.obtain().limit()
-                val commitTitle: String = String.format(getString(R.string.pick_media_finish_format), selectCount, limit)
-                commitMenu.title = commitTitle
+                val finishTitle: String = String.format(getString(R.string.pick_media_finish_format), selectCount, limit)
+                doneButton.item().title = finishTitle
+
             }
-            commitMenu.isEnabled = true
+            doneButton.enable(true)
         }
     }
 }

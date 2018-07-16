@@ -1,0 +1,26 @@
+package pizzk.media.picker.view
+
+import android.support.v7.widget.Toolbar
+import android.view.MenuItem
+
+/**
+ * 标题菜单按钮
+ */
+class PickActionMenu(val toolbar: Toolbar, block: () -> Unit) {
+
+    private val menu: MenuItem = toolbar.menu.add("")
+
+    init {
+        menu.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        menu.setOnMenuItemClickListener {
+            block()
+            return@setOnMenuItemClickListener true
+        }
+    }
+
+    fun item(): MenuItem = menu
+
+    fun enable(value: Boolean) {
+        menu.isEnabled = value
+    }
+}

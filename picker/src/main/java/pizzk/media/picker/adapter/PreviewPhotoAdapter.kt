@@ -3,11 +3,9 @@ package pizzk.media.picker.adapter
 import android.content.Context
 import android.net.Uri
 import android.support.v4.view.PagerAdapter
-import android.support.v4.view.ViewPager
 import android.view.View
 import android.view.ViewGroup
 import com.github.chrisbanes.photoview.PhotoView
-import pizzk.media.picker.R
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.utils.PickUtils
 

@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.*
-import android.view.MenuItem
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.AccelerateInterpolator
@@ -36,7 +35,7 @@ class AlbumActivity : AppCompatActivity() {
     private lateinit var rlBottom: View
     private lateinit var sectionMask: View
     private lateinit var sectionsView: RecyclerView
-    private lateinit var commitMenu: MenuItem
+    private lateinit var doneButton: PickActionMenu
     //适配器
     private lateinit var photoAdapter: AlbumPhotoAdapter
     private lateinit var sectionAdapter: AlbumSectionAdapter
@@ -91,14 +90,12 @@ class AlbumActivity : AppCompatActivity() {
         toolbar.title = getString(R.string.pick_media_select_picture)
         toolbar.setNavigationOnClickListener { finish() }
         //提交按钮
-        commitMenu = toolbar.menu.add(getString(R.string.pick_media_finish))
-        commitMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-        commitMenu.setOnMenuItemClickListener {
-            val selectUris: List<Uri> = photoAdapter.getSelectList().mapNotNull { it.getUri() }
-            PickControl.obtain().callbacks().invoke(selectUris)
+        doneButton = PickActionMenu(toolbar) {
+            val uris: List<Uri> = photoAdapter.getSelectList().mapNotNull { it.getUri() }
+            PickControl.obtain().callbacks().invoke(uris)
             finish()
-            return@setOnMenuItemClickListener true
         }
+        doneButton.item().setTitle(R.string.pick_media_finish)
         //图像列表
         photosView = findViewById(R.id.photoRecycleView)
         (photosView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -193,12 +190,12 @@ class AlbumActivity : AppCompatActivity() {
     private fun onSelectChanged(list: List<AlbumItem>) {
         if (list.isEmpty()) {
             tvPreview.setText(R.string.pick_media_preview)
-            commitMenu.setTitle(R.string.pick_media_finish)
-            commitMenu.isEnabled = false
+            doneButton.item().setTitle(R.string.pick_media_finish)
+            doneButton.enable(false)
         } else {
             tvPreview.text = String.format(getString(R.string.pick_media_preview_format), list.size)
-            commitMenu.title = String.format(getString(R.string.pick_media_finish_format), list.size, PickControl.obtain().limit())
-            commitMenu.isEnabled = true
+            doneButton.item().title = String.format(getString(R.string.pick_media_finish_format), list.size, PickControl.obtain().limit())
+            doneButton.enable(true)
         }
     }
 
