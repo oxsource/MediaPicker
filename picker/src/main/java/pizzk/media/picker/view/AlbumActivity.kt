@@ -21,6 +21,7 @@ import pizzk.media.picker.adapter.AlbumSectionAdapter
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.entity.AlbumItem
 import pizzk.media.picker.entity.AlbumSection
+import pizzk.media.picker.utils.PickUtils
 
 /**
  * 相册Activity
@@ -41,6 +42,7 @@ class AlbumActivity : AppCompatActivity() {
     private lateinit var sectionAdapter: AlbumSectionAdapter
     //标志位
     private var useOriginPhoto: Boolean = false
+    private var finishFlag: Boolean = false
     //动画
     private var animHideSection: AnimatorSet? = null
     private var animShowSection: AnimatorSet? = null
@@ -91,8 +93,7 @@ class AlbumActivity : AppCompatActivity() {
         toolbar.setNavigationOnClickListener { finish() }
         //提交按钮
         doneButton = PickActionMenu(toolbar) {
-            val uris: List<Uri> = photoAdapter.getSelectList().mapNotNull { it.getUri() }
-            PickControl.obtain().callbacks().invoke(uris)
+            finishFlag = true
             finish()
         }
         doneButton.item().setTitle(R.string.pick_media_finish)
@@ -205,23 +206,30 @@ class AlbumActivity : AppCompatActivity() {
         vCenter.background = ContextCompat.getDrawable(baseContext, res)
     }
 
+    override fun finish() {
+        val uri: List<Uri> = if (finishFlag) {
+            photoAdapter.getSelectList().mapNotNull { it.getUri() }
+        } else {
+            emptyList()
+        }
+        PickUtils.setResult(this@AlbumActivity, uri, finishFlag)
+        super.finish()
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != Activity.RESULT_OK) return
         when (requestCode) {
-            PreviewActivity.REQUEST_PREVIEW -> {
-                val intent: Intent = data ?: return
-                val key: String = PreviewActivity.KEY_RESULT_DATA
-                val selectUris: List<Uri> = intent.getParcelableArrayListExtra(key) ?: return
-                val finish: Boolean = intent.getBooleanExtra(PreviewActivity.KEY_FINISH_FLAG, false)
-                if (finish) {
-                    PickControl.obtain().callbacks().invoke(selectUris)
-                    finish()
-                    return
-                }
+            PickUtils.REQUEST_CODE_PREVIEW -> {
+                val selectUris: List<Uri> = PickUtils.obtainResultUris(data)
+                finishFlag = PickUtils.isResultFinish(data)
                 val all: List<AlbumItem> = sectionAdapter.getAlbumsBySectionIndex(0)
                 val selectItems: List<AlbumItem> = all.filter { selectUris.contains(it.getUri()) }
                 photoAdapter.updateSelectList(selectItems)
+                if (finishFlag) {
+                    finish()
+                    return
+                }
             }
         }
     }

@@ -14,7 +14,6 @@ import pizzk.media.picker.utils.PickUtils
 class PickActivity : AppCompatActivity() {
     companion object {
         const val TAG = "PickActivity"
-        const val REQUEST_CODE_CAMERA: Int = 100
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,17 +22,16 @@ class PickActivity : AppCompatActivity() {
         val picker: PickControl = PickControl.obtain()
         when (picker.action()) {
             PickControl.ACTION_ALBUM -> {
-                PickUtils.launchAlbum(PickActivity@ this, true)
+                PickUtils.launchAlbum(PickActivity@ this)
             }
             PickControl.ACTION_CAMERA -> {
-                PickUtils.launchCamera(PickActivity@ this, PickActivity.REQUEST_CODE_CAMERA)
+                PickUtils.launchCamera(PickActivity@ this)
             }
             PickControl.ACTION_PREVIEW -> {
                 val uris: List<Uri> = picker.previews()
                 val previewIndex: Int = picker.previewsIndex()
                 val showSelect = false
                 PreviewActivity.show(this@PickActivity, uris, uris, previewIndex, showSelect)
-                finish()
             }
             PickControl.ACTION_CROP -> {
             }
@@ -48,10 +46,10 @@ class PickActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (PickControl.obtain().action()) {
             PickControl.ACTION_CAMERA -> {
-                PickUtils.launchCamera(this@PickActivity, PickActivity.REQUEST_CODE_CAMERA)
+                PickUtils.launchCamera(this@PickActivity)
             }
             PickControl.ACTION_ALBUM -> {
-                PickUtils.launchAlbum(this@PickActivity, true)
+                PickUtils.launchAlbum(this@PickActivity)
             }
         }
     }
@@ -64,9 +62,20 @@ class PickActivity : AppCompatActivity() {
             return
         }
         when (requestCode) {
-            REQUEST_CODE_CAMERA -> {
+            PickUtils.REQUEST_CODE_CAMERA -> {
                 val uri: Uri = PickControl.obtain().cameraUri() ?: return
                 PickControl.obtain().callbacks().invoke(listOf(uri))
+                finish()
+            }
+            PickUtils.REQUEST_CODE_ALBUM -> {
+                val finished: Boolean = PickUtils.isResultFinish(data)
+                if (finished) {
+                    val uris: List<Uri> = PickUtils.obtainResultUris(data)
+                    PickControl.obtain().callbacks().invoke(uris)
+                }
+                finish()
+            }
+            PickUtils.REQUEST_CODE_PREVIEW -> {
                 finish()
             }
         }

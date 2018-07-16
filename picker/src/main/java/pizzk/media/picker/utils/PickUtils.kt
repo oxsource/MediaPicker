@@ -9,29 +9,34 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.database.Cursor
 import android.net.Uri
-import android.os.Bundle
+import android.os.Build
 import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentTransaction
 import android.support.v4.content.FileProvider
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import pizzk.media.picker.R
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.entity.AlbumItem
 import pizzk.media.picker.entity.AlbumSection
-import java.io.File
-import android.os.Build
-import android.support.v7.app.AppCompatActivity
-import android.view.View
 import pizzk.media.picker.view.AlbumActivity
+import java.io.File
 
 /**
  * 系统工具类
  */
 object PickUtils {
+    const val REQUEST_CODE_CAMERA: Int = 100
+    const val REQUEST_CODE_PREVIEW: Int = 101
+    const val REQUEST_CODE_ALBUM: Int = 102
+    const val REQUEST_CODE_CROP: Int = 103
+
+    //返回结果标志
+    private const val KEY_RESULT_DATA: String = "key_result_data"
+    private const val KEY_FINISH_FLAG: String = "key_finish_flag"
+
     private val cameraPermission: Array<Pair<String, Int>> = arrayOf(
             Pair(Manifest.permission.CAMERA, R.string.open_camera_permission),
             Pair(Manifest.permission.READ_EXTERNAL_STORAGE, R.string.open_external_storage_permission),
@@ -66,21 +71,20 @@ object PickUtils {
     /**
      * 启动相册
      */
-    fun launchAlbum(activity: AppCompatActivity, finish: Boolean) {
+    fun launchAlbum(activity: AppCompatActivity) {
         val access: Boolean = checkPermission(activity, externalPermission) {
             Log.d(activity::class.java.simpleName, "permission refused:$it")
             activity.finish()
         }
         if (!access) return
         val intent = Intent(activity, AlbumActivity::class.java)
-        activity.startActivity(intent)
-        if (finish) activity.finish()
+        activity.startActivityForResult(intent, PickUtils.REQUEST_CODE_ALBUM)
     }
 
     /**
      * 启动相机
      */
-    fun launchCamera(activity: AppCompatActivity, requestCode: Int): Uri? {
+    fun launchCamera(activity: AppCompatActivity): Uri? {
         //权限确认
         val access: Boolean = PickUtils.checkPermission(activity, cameraPermission) {
             Log.d(activity::class.java.simpleName, "permission refused:$it")
@@ -102,7 +106,7 @@ object PickUtils {
         val uri: Uri = FileProvider.getUriForFile(activity, PickControl.authority(), file)
         PickControl.obtain().cameraUri(uri)
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
-        activity.startActivityForResult(intent, requestCode)
+        activity.startActivityForResult(intent, PickUtils.REQUEST_CODE_CAMERA)
         return uri
     }
 
@@ -183,6 +187,7 @@ object PickUtils {
         return true
     }
 
+    //获取状态栏高度
     fun getStatusBarHeight(context: Context): Int {
         val resources: Resources = context.resources
         val resourceId: Int = resources.getIdentifier("status_bar_height", "dimen", "android")
@@ -191,5 +196,24 @@ object PickUtils {
         } else {
             (23 * resources.displayMetrics.density + 0.5f).toInt()
         }
+    }
+
+    //获取结果中的uri列表
+    fun obtainResultUris(data: Intent?): List<Uri> {
+        val intent: Intent = data ?: return emptyList()
+        return intent.getParcelableArrayListExtra(KEY_RESULT_DATA) ?: return emptyList()
+    }
+
+    //获取结果中是否关闭标志
+    fun isResultFinish(data: Intent?): Boolean {
+        val intent: Intent = data ?: return false
+        return intent.getBooleanExtra(KEY_FINISH_FLAG, false)
+    }
+
+    fun setResult(activity: Activity, uri: List<Uri>?, finish: Boolean) {
+        val intent = Intent()
+        intent.putParcelableArrayListExtra(KEY_RESULT_DATA, ArrayList(uri ?: emptyList()))
+        intent.putExtra(KEY_FINISH_FLAG, finish)
+        activity.setResult(Activity.RESULT_OK, intent)
     }
 }

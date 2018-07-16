@@ -33,12 +33,6 @@ class PreviewActivity : AppCompatActivity() {
         private const val KEY_SELECT_FLAG: String = "key_select_flag"
         private const val KEY_SELECT_DATA: String = "key_select_data"
 
-        //返回结果标志
-        internal const val KEY_RESULT_DATA: String = "key_result_data"
-        internal const val KEY_FINISH_FLAG: String = "key_finish_flag"
-
-        internal const val REQUEST_PREVIEW: Int = 101
-
         internal fun show(activity: Activity?, all: List<Uri>, selects: List<Uri>, index: Int, showSelect: Boolean) {
             val context: Activity = activity ?: return
             val bundle = Bundle()
@@ -48,7 +42,7 @@ class PreviewActivity : AppCompatActivity() {
             bundle.putParcelableArrayList(KEY_SELECT_DATA, ArrayList(selects))
             val intent = Intent(context, PreviewActivity::class.java)
             intent.putExtras(bundle)
-            context.startActivityForResult(intent, REQUEST_PREVIEW)
+            context.startActivityForResult(intent, PickUtils.REQUEST_CODE_PREVIEW)
         }
     }
 
@@ -107,10 +101,7 @@ class PreviewActivity : AppCompatActivity() {
     }
 
     override fun finish() {
-        val intent = Intent()
-        intent.putParcelableArrayListExtra(KEY_RESULT_DATA, ArrayList(selectAdapter.getList()))
-        intent.putExtra(KEY_FINISH_FLAG, finishFlag)
-        setResult(Activity.RESULT_OK, intent)
+        PickUtils.setResult(this@PreviewActivity, selectAdapter.getList(), finishFlag)
         super.finish()
     }
 
