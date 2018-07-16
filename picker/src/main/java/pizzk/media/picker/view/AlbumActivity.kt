@@ -18,7 +18,6 @@ import android.widget.TextView
 import pizzk.media.picker.R
 import pizzk.media.picker.adapter.AlbumPhotoAdapter
 import pizzk.media.picker.adapter.AlbumSectionAdapter
-import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.entity.AlbumItem
 import pizzk.media.picker.entity.AlbumSection
 import pizzk.media.picker.utils.PickUtils
@@ -27,6 +26,16 @@ import pizzk.media.picker.utils.PickUtils
  * 相册Activity
  */
 class AlbumActivity : AppCompatActivity() {
+    companion object {
+        private const val KEY_SELECT_LIMIT: String = "key_select_limit"
+
+        fun show(activity: Activity, limit: Int) {
+            val intent = Intent(activity, AlbumActivity::class.java)
+            intent.putExtra(KEY_SELECT_LIMIT, limit)
+            activity.startActivityForResult(intent, PickUtils.REQUEST_CODE_ALBUM)
+        }
+    }
+
     private lateinit var toolbar: Toolbar
     private lateinit var photosView: RecyclerView
     private lateinit var tvSection: TextView
@@ -43,6 +52,7 @@ class AlbumActivity : AppCompatActivity() {
     //标志位
     private var useOriginPhoto: Boolean = false
     private var finishFlag: Boolean = false
+    private var selectLimit: Int = 0
     //动画
     private var animHideSection: AnimatorSet? = null
     private var animShowSection: AnimatorSet? = null
@@ -56,13 +66,14 @@ class AlbumActivity : AppCompatActivity() {
 
     //初始化适配器
     private fun setupAdapter() {
+        selectLimit = intent.getIntExtra(KEY_SELECT_LIMIT, selectLimit)
         //图片适配器
         photoAdapter = AlbumPhotoAdapter(baseContext)
         photoAdapter.setSelectBlock(::onSelectChanged)
         photoAdapter.setTapBlock { _, index ->
             val uris: List<Uri> = photoAdapter.getList().mapNotNull(AlbumItem::getUri)
             val selects: List<Uri> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri)
-            PreviewActivity.show(this@AlbumActivity, uris, selects, index, true)
+            PreviewActivity.show(this@AlbumActivity, uris, selects, index, selectLimit)
         }
         //目录适配器
         sectionAdapter = AlbumSectionAdapter(baseContext)
@@ -137,7 +148,7 @@ class AlbumActivity : AppCompatActivity() {
                 val uris: List<Uri> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri)
                 if (uris.isNotEmpty()) {
                     val selects: List<Uri> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri)
-                    PreviewActivity.show(this@AlbumActivity, uris, selects, 0, true)
+                    PreviewActivity.show(this@AlbumActivity, uris, selects, 0, selectLimit)
                 }
             }
             sectionMask -> {
@@ -195,7 +206,7 @@ class AlbumActivity : AppCompatActivity() {
             doneButton.enable(false)
         } else {
             tvPreview.text = String.format(getString(R.string.pick_media_preview_format), list.size)
-            doneButton.item().title = String.format(getString(R.string.pick_media_finish_format), list.size, PickControl.obtain().limit())
+            doneButton.item().title = String.format(getString(R.string.pick_media_finish_format), list.size, selectLimit)
             doneButton.enable(true)
         }
     }
@@ -207,12 +218,8 @@ class AlbumActivity : AppCompatActivity() {
     }
 
     override fun finish() {
-        val uri: List<Uri> = if (finishFlag) {
-            photoAdapter.getSelectList().mapNotNull { it.getUri() }
-        } else {
-            emptyList()
-        }
-        PickUtils.setResult(this@AlbumActivity, uri, finishFlag)
+        val uri: List<Uri> = photoAdapter.getSelectList().mapNotNull { it.getUri() }
+        PickUtils.setResult(this@AlbumActivity, uri, finishFlag, true)
         super.finish()
     }
 

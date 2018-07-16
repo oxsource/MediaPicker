@@ -6,6 +6,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.content.res.Resources
 import android.database.Cursor
 import android.net.Uri
@@ -18,10 +19,13 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import pizzk.media.picker.R
+import pizzk.media.picker.arch.CropParams
+import pizzk.media.picker.arch.MimeType
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.entity.AlbumItem
 import pizzk.media.picker.entity.AlbumSection
 import pizzk.media.picker.view.AlbumActivity
+import pizzk.media.picker.view.PreviewActivity
 import java.io.File
 
 /**
@@ -50,14 +54,14 @@ object PickUtils {
     /**
      * 检查权限
      */
-    private fun checkPermission(activity: Activity, ps: Array<Pair<String, Int>>, refuse: (ps: String) -> Unit): Boolean {
+    private fun checkPermission(activity: Activity, ps: Array<Pair<String, Int>>,
+                                requestCode: Int, refuse: (ps: String) -> Unit): Boolean {
         for (i: Int in 0 until ps.size) {
             val p: Pair<String, Int> = ps[i]
             val auth: Boolean = ActivityCompat.checkSelfPermission(activity, p.first) == PackageManager.PERMISSION_GRANTED
             if (auth) continue
             val shown: Boolean = ActivityCompat.shouldShowRequestPermissionRationale(activity, p.first)
             if (shown) {
-                val requestCode: Int = i + 100
                 ActivityCompat.requestPermissions(activity, arrayOf(p.first), requestCode)
             } else {
                 Toast.makeText(activity, p.second, Toast.LENGTH_SHORT).show()
@@ -72,13 +76,12 @@ object PickUtils {
      * 启动相册
      */
     fun launchAlbum(activity: AppCompatActivity) {
-        val access: Boolean = checkPermission(activity, externalPermission) {
+        val access: Boolean = checkPermission(activity, externalPermission, PickUtils.REQUEST_CODE_ALBUM) {
             Log.d(activity::class.java.simpleName, "permission refused:$it")
             activity.finish()
         }
         if (!access) return
-        val intent = Intent(activity, AlbumActivity::class.java)
-        activity.startActivityForResult(intent, PickUtils.REQUEST_CODE_ALBUM)
+        AlbumActivity.show(activity, PickControl.obtain().limit())
     }
 
     /**
@@ -86,13 +89,13 @@ object PickUtils {
      */
     fun launchCamera(activity: AppCompatActivity): Uri? {
         //权限确认
-        val access: Boolean = PickUtils.checkPermission(activity, cameraPermission) {
+        val access: Boolean = PickUtils.checkPermission(activity, cameraPermission, PickUtils.REQUEST_CODE_CAMERA) {
             Log.d(activity::class.java.simpleName, "permission refused:$it")
             activity.finish()
         }
         if (!access) return null
         //创建文件
-        val optionalFile: File? = FileUtils.createPhoto(activity.application)
+        val optionalFile: File? = FileUtils.createPhoto(activity.application, MimeType.JPEG.extensions[0])
         if (null == optionalFile) {
             Toast.makeText(activity, activity.getString(R.string.pick_media_fail_to_create_file), Toast.LENGTH_SHORT).show()
             activity.finish()
@@ -103,11 +106,85 @@ object PickUtils {
         intent.action = MediaStore.ACTION_IMAGE_CAPTURE
         intent.addCategory(Intent.CATEGORY_DEFAULT)
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        val uri: Uri = FileProvider.getUriForFile(activity, PickControl.authority(), file)
-        PickControl.obtain().cameraUri(uri)
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+        val outUri: Uri = FileProvider.getUriForFile(activity, PickControl.authority(), file)
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, outUri)
         activity.startActivityForResult(intent, PickUtils.REQUEST_CODE_CAMERA)
-        return uri
+        PickControl.obtain().cameraUri(outUri)
+        return outUri
+    }
+
+    /**
+     * 启动预览
+     */
+    fun launchPreview(activity: AppCompatActivity) {
+        val picker: PickControl = PickControl.obtain()
+        val uris: List<Uri> = picker.previews()
+        val previewIndex: Int = picker.previewsIndex()
+        val selectLimit = 0
+        PreviewActivity.show(activity, uris, uris, previewIndex, selectLimit)
+    }
+
+    /**
+     * 启动裁剪
+     */
+    fun launchCrop(activity: AppCompatActivity): Uri? {
+        val cropParams: CropParams? = PickControl.obtain().crop()
+        //检查裁切参数
+        if (null == cropParams) {
+            Log.d(activity::class.java.simpleName, "please special crop params")
+            activity.finish()
+        }
+        val params: CropParams = cropParams ?: return null
+        //检查裁切图像路径
+        val uri: Uri? = params.uri
+        if (null == uri) {
+            Log.d(activity::class.java.simpleName, "please special crop uri")
+            activity.finish()
+        }
+        val srcUri: Uri = uri ?: return null
+        //检查裁切图像存储权限
+        val access: Boolean = checkPermission(activity, externalPermission, PickUtils.REQUEST_CODE_CROP) {
+            Log.d(activity::class.java.simpleName, "permission refused:$it")
+            activity.finish()
+        }
+        if (!access) return null
+        //创建文件
+        val optionalFile: File? = FileUtils.createPhoto(activity.application, params.getFormatExt(), "crop")
+        if (null == optionalFile) {
+            Toast.makeText(activity, activity.getString(R.string.pick_media_fail_to_create_file), Toast.LENGTH_SHORT).show()
+            activity.finish()
+        }
+        val file: File = optionalFile ?: return null
+        //开始裁剪
+        val outUri: Uri = FileProvider.getUriForFile(activity, PickControl.authority(), file)
+        val intent = Intent("com.android.camera.action.CROP")
+        intent.setDataAndType(srcUri, "image/*")
+        intent.putExtra("crop", "true")
+        if (params.aspectX > 0) {
+            intent.putExtra("aspectX", params.aspectX)
+        }
+        if (params.aspectY > 0) {
+            intent.putExtra("aspectY", params.aspectY)
+        }
+        if (params.outputX > 0) {
+            intent.putExtra("outputX", params.outputX)
+        }
+        if (params.outputY > 0) {
+            intent.putExtra("outputY", params.outputY)
+        }
+        intent.putExtra("return-data", false)
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, outUri)
+        intent.putExtra("outputFormat", params.getFormatPlain())
+        //相关应用授权
+        val resolves: List<ResolveInfo> = activity.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        val grantFlag: Int = Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        for (info: ResolveInfo in resolves) {
+            val packageName: String = info.activityInfo.packageName
+            activity.grantUriPermission(packageName, outUri, grantFlag)
+        }
+        activity.startActivityForResult(intent, PickUtils.REQUEST_CODE_CROP)
+        PickControl.obtain().cropUri(outUri)
+        return outUri
     }
 
     /**
@@ -210,7 +287,11 @@ object PickUtils {
         return intent.getBooleanExtra(KEY_FINISH_FLAG, false)
     }
 
-    fun setResult(activity: Activity, uri: List<Uri>?, finish: Boolean) {
+    fun setResult(activity: Activity, uri: List<Uri>?, finish: Boolean, notFinishCancel: Boolean) {
+        if (!finish && notFinishCancel) {
+            activity.setResult(Activity.RESULT_CANCELED)
+            return
+        }
         val intent = Intent()
         intent.putParcelableArrayListExtra(KEY_RESULT_DATA, ArrayList(uri ?: emptyList()))
         intent.putExtra(KEY_FINISH_FLAG, finish)

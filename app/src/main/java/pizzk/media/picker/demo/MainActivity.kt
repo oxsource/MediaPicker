@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import android.widget.TextView
+import pizzk.media.picker.arch.CropParams
 import pizzk.media.picker.arch.MimeType
 import pizzk.media.picker.arch.PickControl
 
@@ -19,10 +20,14 @@ class MainActivity : AppCompatActivity() {
         label = findViewById(R.id.label)
         label.text = "未选择照片"
         button = findViewById(R.id.button)
+        val cropParams = CropParams(
+                aspectX = 1, aspectY = 1,
+                outputX = 400, outputY = 400)
         PickControl.obtain().action(PickControl.ACTION_ALBUM)
                 .filter { uri, mime ->
                     null !== uri && (mime in MimeType.ofImage().map { it.mime })
-                }.limit(9)
+                }.limit(1)
+                .crop(cropParams)
                 .callback(MainActivity@ this::onPickSuccess)
         button.setOnClickListener {
             PickControl.obtain().done(MainActivity@ this)

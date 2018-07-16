@@ -21,7 +21,6 @@ import pizzk.media.picker.R
 import pizzk.media.picker.adapter.PagerListener
 import pizzk.media.picker.adapter.PreviewPhotoAdapter
 import pizzk.media.picker.adapter.PreviewSelectAdapter
-import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.listener.SimpleAnimationListener
 import pizzk.media.picker.utils.PickUtils
 
@@ -30,18 +29,16 @@ class PreviewActivity : AppCompatActivity() {
     companion object {
         private const val KEY_DATA: String = "key_data"
         private const val KEY_INDEX: String = "key_index"
-        private const val KEY_SELECT_FLAG: String = "key_select_flag"
+        private const val KEY_SELECT_LIMIT: String = "key_select_limit"
         private const val KEY_SELECT_DATA: String = "key_select_data"
 
-        internal fun show(activity: Activity?, all: List<Uri>, selects: List<Uri>, index: Int, showSelect: Boolean) {
+        internal fun show(activity: Activity?, all: List<Uri>, selects: List<Uri>, index: Int, selectLimit: Int = 0) {
             val context: Activity = activity ?: return
-            val bundle = Bundle()
-            bundle.putParcelableArrayList(KEY_DATA, ArrayList(all))
-            bundle.putInt(KEY_INDEX, index)
-            bundle.putBoolean(KEY_SELECT_FLAG, showSelect)
-            bundle.putParcelableArrayList(KEY_SELECT_DATA, ArrayList(selects))
             val intent = Intent(context, PreviewActivity::class.java)
-            intent.putExtras(bundle)
+            intent.putParcelableArrayListExtra(KEY_DATA, ArrayList(all))
+            intent.putExtra(KEY_INDEX, index)
+            intent.putExtra(KEY_SELECT_LIMIT, selectLimit)
+            intent.putParcelableArrayListExtra(KEY_SELECT_DATA, ArrayList(selects))
             context.startActivityForResult(intent, PickUtils.REQUEST_CODE_PREVIEW)
         }
     }
@@ -62,7 +59,7 @@ class PreviewActivity : AppCompatActivity() {
     private lateinit var selectAdapter: PreviewSelectAdapter
     //标志
     private var currentIndex: Int = 0
-    private var selectMode: Boolean = false
+    private var selectLimit: Int = 0
     private var finishFlag: Boolean = false
     //可见性
     private var overlayFlag: Boolean = true
@@ -76,10 +73,9 @@ class PreviewActivity : AppCompatActivity() {
 
     //设置适配器
     private fun setupAdapter() {
-        val bundle: Bundle = intent.extras
-        val photos: List<Uri> = bundle.getParcelableArrayList(PreviewActivity.KEY_DATA)
+        val photos: List<Uri> = intent.getParcelableArrayListExtra(PreviewActivity.KEY_DATA)
         //预览相关
-        currentIndex = bundle.getInt(PreviewActivity.KEY_INDEX, currentIndex)
+        currentIndex = intent.getIntExtra(PreviewActivity.KEY_INDEX, currentIndex)
         photoAdapter = PreviewPhotoAdapter(baseContext, photos)
         photoAdapter.setClickListener { switchOverlayVisibility() }
         photoAdapter.setScaleBlock {
@@ -88,8 +84,8 @@ class PreviewActivity : AppCompatActivity() {
             }
         }
         //选择相关
-        selectMode = bundle.getBoolean(PreviewActivity.KEY_SELECT_FLAG, selectMode)
-        val selects: List<Uri> = bundle.getParcelableArrayList(PreviewActivity.KEY_SELECT_DATA)
+        selectLimit = intent.getIntExtra(PreviewActivity.KEY_SELECT_LIMIT, selectLimit)
+        val selects: List<Uri> = intent.getParcelableArrayListExtra(PreviewActivity.KEY_SELECT_DATA)
         selectAdapter = PreviewSelectAdapter(baseContext, selects)
         selectAdapter.setClickListener {
             val uri: Uri = it
@@ -101,7 +97,7 @@ class PreviewActivity : AppCompatActivity() {
     }
 
     override fun finish() {
-        PickUtils.setResult(this@PreviewActivity, selectAdapter.getList(), finishFlag)
+        PickUtils.setResult(this@PreviewActivity, selectAdapter.getList(), finishFlag, false)
         super.finish()
     }
 
@@ -133,10 +129,9 @@ class PreviewActivity : AppCompatActivity() {
         llSelect = findViewById(R.id.llSelect)
         llSelect.setOnClickListener {
             if (currentIndex < 0) return@setOnClickListener
-            val limit: Int = PickControl.obtain().limit()
-            if (selectAdapter.getList().size >= limit) {
+            if (selectAdapter.getList().size >= selectLimit) {
                 val hint: String = getString(R.string.pick_media_most_select_limit)
-                val content: String = String.format(hint, limit)
+                val content: String = String.format(hint, selectLimit)
                 Toast.makeText(baseContext, content, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -169,7 +164,7 @@ class PreviewActivity : AppCompatActivity() {
 
 
     private fun notifyBottomChanged(shown: Boolean) {
-        if (selectMode) {
+        if (selectLimit > 0) {
             rlBottom.visibility = if (shown) View.VISIBLE else View.GONE
             val emptySelect: Boolean = selectAdapter.getList().isEmpty()
             selectedView.visibility = if (shown && !emptySelect) View.VISIBLE else View.GONE
@@ -237,12 +232,11 @@ class PreviewActivity : AppCompatActivity() {
         //标题菜单显示空时
         if (selectAdapter.getList().isEmpty()) {
             doneButton.item().setTitle(R.string.pick_media_finish)
-            doneButton.enable(!selectMode)
+            doneButton.enable(selectLimit <= 0)
         } else {
-            if (selectMode) {
+            if (selectLimit > 0) {
                 val selectCount: Int = selectAdapter.getList().size
-                val limit: Int = PickControl.obtain().limit()
-                val finishTitle: String = String.format(getString(R.string.pick_media_finish_format), selectCount, limit)
+                val finishTitle: String = String.format(getString(R.string.pick_media_finish_format), selectCount, selectLimit)
                 doneButton.item().title = finishTitle
 
             }

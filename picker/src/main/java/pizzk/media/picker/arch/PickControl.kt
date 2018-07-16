@@ -48,6 +48,7 @@ class PickControl private constructor() {
     private var callback: (List<Uri>) -> Unit = dCallback
     //裁剪
     private var crop: CropParams? = null
+    private var cropUri: Uri? = null
     //预览
     private var previews: List<Uri> = emptyList()
     private var previewsIndex: Int = 0
@@ -167,5 +168,17 @@ class PickControl private constructor() {
      */
     internal fun cameraUri(uri: Uri?) {
         cameraUri = uri
+    }
+
+    /**
+     * 获取裁切Uri
+     */
+    internal fun cropUri(): Uri? = cropUri
+
+    /**
+     * 暂存裁切Uri
+     */
+    internal fun cropUri(uri: Uri?) {
+        cropUri = uri
     }
 }
