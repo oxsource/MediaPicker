@@ -25,14 +25,14 @@
         android:id="@+id/selectRecycleView"
         android:layout_width="match_parent"
         android:layout_height="@dimen/album_preview_bottom_gallery"
-        android:background="@color/album_preview_overlay"
+        android:background="@color/pick_preview_overlay"
         app:layout_constraintBottom_toTopOf="@+id/rlBottom" />
 
     <RelativeLayout
         android:id="@+id/rlBottom"
         android:layout_width="match_parent"
         android:layout_height="@dimen/picker_toolbar_height"
-        android:background="@color/album_preview_overlay"
+        android:background="@color/pick_preview_overlay"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <View

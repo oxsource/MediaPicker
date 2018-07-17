@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="color_white">#ffffff</color>
+    <!--相册-->
     <color name="album_item_background">#000000</color>
     <color name="album_item_image">#393a3f</color>
     <color name="album_item_mask">#66000000</color>
     <color name="album_item_check">#5bb72d</color>
     <color name="album_item_check_disable">#438622</color>
     <color name="album_item_uncheck">#ffffff</color>
+    <color name="album_section_mask">#eb212123</color>
+    <color name="album_section_background">#ffffff</color>
+    <!--预览-->
+    <color name="pick_preview_overlay">#e5000000</color>
+    <color name="pick_review_background">#000000</color>
+    <color name="pick_review_bottom_line">#262626</color>
+    <!--主题-->
     <color name="pick_accent_color">#303135</color>
     <color name="pick_accent_light_color">#505156</color>
     <color name="bottom_tool_text">#ffffff</color>
     <color name="pick_title_color">#ffffff</color>
-    <color name="album_section_mask">#eb212123</color>
-    <color name="album_section_background">#ffffff</color>
-    <color name="album_preview_overlay">#e5000000</color>
-    <color name="pick_review_background">#000000</color>
-    <color name="pick_review_bottom_line">#262626</color>
+    <!--图片拾取-->
     <color name="pick_photo_dash_line">#dcdcdc</color>
     <color name="pick_photo_solid_line">#e6e6e6</color>
     <color name="pick_photo_hint_text_color">#222222</color>
-
     <color name="pick_chose_text_color">#303135</color>
     <color name="pick_chose_mask">#66000000</color>
     <color name="pick_chose_split_line">#dcdcdc</color>
