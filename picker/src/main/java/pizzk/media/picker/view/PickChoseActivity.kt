@@ -31,15 +31,15 @@ class PickChoseActivity : AppCompatActivity() {
 
     private lateinit var vMask: View
     private lateinit var recyclerView: RecyclerView
+    private var choice: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pick_chose)
         val adapter = PickChoseAdapter(baseContext)
         adapter.setTapBlock { _, index ->
+            choice = adapter.getList()[index]
             finish()
-            val result: String = adapter.getList()[index]
-            resultBlock(result)
         }
         val choice: List<String> = intent.getStringArrayListExtra(KEY_CHOICE_LIST)
         adapter.append(choice, true)
@@ -54,37 +54,34 @@ class PickChoseActivity : AppCompatActivity() {
     }
 
 
-    private fun playRecycleViewAnim(shown: Boolean, block: () -> Unit = {}) {
+    private fun playRecycleViewAnim(shown: Boolean) {
         val animatorSet = AnimatorSet()
         //透明度
         val alphaValues: FloatArray = if (shown) floatArrayOf(0f, 1f) else floatArrayOf(1f, 0f)
-        val alpha: ObjectAnimator = ObjectAnimator.ofFloat(vMask, "alpha", *alphaValues)
+        val alphaMask: ObjectAnimator = ObjectAnimator.ofFloat(vMask, "alpha", *alphaValues)
         //缩放
         val scaleValues: FloatArray = if (shown) floatArrayOf(0.8f, 1f) else floatArrayOf(1f, 0.9f)
         val scaleX: ObjectAnimator = ObjectAnimator.ofFloat(recyclerView, "scaleX", *scaleValues)
         val scaleY: ObjectAnimator = ObjectAnimator.ofFloat(recyclerView, "scaleY", *scaleValues)
-        animatorSet.duration = if (shown) 70 else 35
+        val alphaView: ObjectAnimator = ObjectAnimator.ofFloat(recyclerView, "alpha", *alphaValues)
+        animatorSet.duration = 100
         animatorSet.interpolator = DecelerateInterpolator()
-        animatorSet.play(alpha).with(scaleX).with(scaleY)
-        if (!shown) {
-            animatorSet.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    super.onAnimationEnd(animation)
-                    block()
-                }
-            })
-        }
+        animatorSet.play(alphaMask).with(alphaView).with(scaleX).with(scaleY)
+        animatorSet.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                super.onAnimationEnd(animation)
+                if (shown) return
+                recyclerView.visibility = View.GONE
+                vMask.visibility = View.GONE
+                super@PickChoseActivity.finish()
+                overridePendingTransition(0, 0)
+                if (choice.isNotEmpty()) resultBlock(choice)
+            }
+        })
         animatorSet.start()
     }
 
     override fun finish() {
-        playRecycleViewAnim(false) {
-            recyclerView.visibility = View.GONE
-            vMask.visibility = View.GONE
-        }
-        vMask.postDelayed({
-            super.finish()
-            overridePendingTransition(0, 0)
-        }, 30)
+        playRecycleViewAnim(false)
     }
 }

@@ -18,13 +18,11 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Toast
 import pizzk.media.picker.R
-import pizzk.media.picker.listener.PagerListener
 import pizzk.media.picker.adapter.PreviewPhotoAdapter
 import pizzk.media.picker.adapter.PreviewSelectAdapter
+import pizzk.media.picker.listener.PagerListener
 import pizzk.media.picker.listener.SimpleAnimationListener
 import pizzk.media.picker.utils.PickUtils
-import java.net.URI
-import java.net.URL
 
 
 class PreviewActivity : AppCompatActivity() {
@@ -42,9 +40,7 @@ class PreviewActivity : AppCompatActivity() {
             intent.putExtra(KEY_SELECT_LIMIT, selectLimit)
             intent.putStringArrayListExtra(KEY_SELECT_DATA, ArrayList(selects))
             context.startActivityForResult(intent, PickUtils.REQUEST_CODE_PREVIEW)
-
-            val url = URL("http://www.baidu.com")
-            val uri: URI = url.toURI()
+            activity.overridePendingTransition(0, 0)
         }
     }
 
@@ -105,6 +101,7 @@ class PreviewActivity : AppCompatActivity() {
         val uris: List<Uri>? = if (selectLimit > 0) selectAdapter.getList().mapNotNull(Uri::parse) else null
         PickUtils.setResult(this@PreviewActivity, uris, finishFlag, false)
         super.finish()
+        overridePendingTransition(0, 0)
     }
 
     //初始化视图控件
@@ -135,14 +132,14 @@ class PreviewActivity : AppCompatActivity() {
         llSelect = findViewById(R.id.llSelect)
         llSelect.setOnClickListener {
             if (currentIndex < 0) return@setOnClickListener
-            if (selectAdapter.getList().size >= selectLimit) {
+            val path: String = photoAdapter.getList()[currentIndex]
+            val select: Boolean = !selectAdapter.getList().contains(path)
+            if (select && selectAdapter.getList().size >= selectLimit) {
                 val hint: String = getString(R.string.pick_media_most_select_limit)
                 val content: String = String.format(hint, selectLimit)
                 Toast.makeText(baseContext, content, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val path: String = photoAdapter.getList()[currentIndex]
-            val select: Boolean = !selectAdapter.getList().contains(path)
             switchSelectBox(select, currentIndex)
             selectAdapter.onPreviewChanged(path, selectedView)
         }

@@ -35,6 +35,7 @@ class AlbumActivity : AppCompatActivity() {
             intent.putExtra(KEY_SELECT_LIMIT, limit)
             intent.putParcelableArrayListExtra(KEY_SELECT_DATA, ArrayList(selects))
             activity.startActivityForResult(intent, PickUtils.REQUEST_CODE_ALBUM)
+            activity.overridePendingTransition(0, 0)
         }
     }
 
@@ -230,6 +231,7 @@ class AlbumActivity : AppCompatActivity() {
         val uri: List<Uri> = photoAdapter.getSelectList().mapNotNull { it.getUri() }
         PickUtils.setResult(this@AlbumActivity, uri, finishFlag, true)
         super.finish()
+        overridePendingTransition(0, 0)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
