@@ -42,6 +42,10 @@ class PickActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (!PickUtils.onRequestPermissionResult(this@PickActivity, permissions, grantResults)) {
+            finish()
+            return
+        }
         when (requestCode) {
             PickUtils.REQUEST_CODE_CAMERA -> {
                 PickUtils.launchCamera(this@PickActivity)

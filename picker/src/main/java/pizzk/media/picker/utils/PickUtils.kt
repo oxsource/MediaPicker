@@ -43,32 +43,52 @@ object PickUtils {
     private const val KEY_RESULT_DATA: String = "key_result_data"
     private const val KEY_FINISH_FLAG: String = "key_finish_flag"
 
-    private val cameraPermission: Array<Pair<String, Int>> = arrayOf(
-            Pair(Manifest.permission.CAMERA, R.string.open_camera_permission),
-            Pair(Manifest.permission.READ_EXTERNAL_STORAGE, R.string.open_external_storage_permission),
-            Pair(Manifest.permission.WRITE_EXTERNAL_STORAGE, R.string.open_external_storage_permission)
+    private val cameraPermission: Array<String> = arrayOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
-    private val externalPermission: Array<Pair<String, Int>> = arrayOf(
-            Pair(Manifest.permission.READ_EXTERNAL_STORAGE, R.string.open_external_storage_permission),
-            Pair(Manifest.permission.WRITE_EXTERNAL_STORAGE, R.string.open_external_storage_permission)
+    private val externalPermission: Array<String> = arrayOf(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
 
     /**
      * 检查权限
      */
-    private fun checkPermission(activity: Activity, ps: Array<Pair<String, Int>>,
-                                requestCode: Int, refuse: (ps: String) -> Unit): Boolean {
+    private fun checkPermission(activity: Activity, ps: Array<String>, requestCode: Int): Boolean {
+        val notGrant: MutableList<String> = ArrayList()
         for (i: Int in 0 until ps.size) {
-            val p: Pair<String, Int> = ps[i]
-            val auth: Boolean = ActivityCompat.checkSelfPermission(activity, p.first) == PackageManager.PERMISSION_GRANTED
+            val p: String = ps[i]
+            val auth: Boolean = ActivityCompat.checkSelfPermission(activity, p) == PackageManager.PERMISSION_GRANTED
             if (auth) continue
-            val shown: Boolean = ActivityCompat.shouldShowRequestPermissionRationale(activity, p.first)
-            if (shown) {
-                ActivityCompat.requestPermissions(activity, arrayOf(p.first), requestCode)
-            } else {
-                Toast.makeText(activity, p.second, Toast.LENGTH_SHORT).show()
-                refuse(p.first)
+            notGrant.add(p)
+        }
+        if (notGrant.isEmpty()) return true
+        ActivityCompat.requestPermissions(activity, notGrant.toTypedArray(), requestCode)
+        return false
+    }
+
+    /**
+     * 检查权限回调
+     */
+    fun onRequestPermissionResult(activity: Activity, ps: Array<out String>, grants: IntArray): Boolean {
+        for (i: Int in 0 until ps.size) {
+            if (PackageManager.PERMISSION_GRANTED == grants[i]) continue
+            val permission: String = ps[i]
+            val rationale: Boolean = ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)
+            val refuseHint: String = activity.getString(R.string.permission_refuse)
+            val message: String = when (permission) {
+                Manifest.permission.CAMERA -> {
+                    if (rationale) refuseHint else activity.getString(R.string.open_camera_permission)
+                }
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE -> {
+                    if (rationale) refuseHint else activity.getString(R.string.open_external_storage_permission)
+                }
+                else -> refuseHint
             }
+            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
             return false
         }
         return true
@@ -78,10 +98,7 @@ object PickUtils {
      * 启动相册
      */
     fun launchAlbum(activity: AppCompatActivity) {
-        val access: Boolean = checkPermission(activity, externalPermission, PickUtils.REQUEST_CODE_ALBUM) {
-            Log.d(activity::class.java.simpleName, "permission refused:$it")
-            activity.finish()
-        }
+        val access: Boolean = checkPermission(activity, externalPermission, PickUtils.REQUEST_CODE_ALBUM)
         if (!access) return
         val picker: PickControl = PickControl.obtain(false)
         val uris: List<Uri> = picker.selects().mapNotNull(PickUtils::path2Uri)
@@ -94,10 +111,7 @@ object PickUtils {
      */
     fun launchCamera(activity: AppCompatActivity): Uri? {
         //权限确认
-        val access: Boolean = PickUtils.checkPermission(activity, cameraPermission, PickUtils.REQUEST_CODE_CAMERA) {
-            Log.d(activity::class.java.simpleName, "permission refused:$it")
-            activity.finish()
-        }
+        val access: Boolean = PickUtils.checkPermission(activity, cameraPermission, PickUtils.REQUEST_CODE_CAMERA)
         if (!access) return null
         //创建文件
         val optionalFile: File? = FileUtils.createPhoto(activity.application, MimeType.JPEG.extensions[0])
@@ -148,10 +162,7 @@ object PickUtils {
         }
         val srcUri: Uri = uri ?: return null
         //检查裁切图像存储权限
-        val access: Boolean = checkPermission(activity, externalPermission, PickUtils.REQUEST_CODE_CROP) {
-            Log.d(activity::class.java.simpleName, "permission refused:$it")
-            activity.finish()
-        }
+        val access: Boolean = checkPermission(activity, externalPermission, PickUtils.REQUEST_CODE_CROP)
         if (!access) return null
         //创建文件
         val optionalFile: File? = FileUtils.createPhoto(activity.application, params.getFormatExt(), "crop")

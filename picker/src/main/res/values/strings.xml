@@ -17,4 +17,5 @@
     <string name="pick_media_select">选择</string>
     <string name="pick_chose_camera">拍照</string>
     <string name="pick_chose_album">相册</string>
+    <string name="permission_refuse">权限拒绝</string>
 </resources>
