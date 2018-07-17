@@ -21,6 +21,6 @@
     <color name="pick_photo_hint_text_color">#222222</color>
 
     <color name="pick_chose_text_color">#303135</color>
-    <color name="pick_chose_mask">#75212123</color>
-    <color name="pick_chose_split_line">#96505156</color>
+    <color name="pick_chose_mask">#66000000</color>
+    <color name="pick_chose_split_line">#dcdcdc</color>
 </resources>

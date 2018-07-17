@@ -55,5 +55,13 @@ enum class MimeType(val mime: String, val extensions: Array<String>) {
             val name = "external"
             return MediaStore.Files.getContentUri(name)
         }
+
+        fun getMimeByPath(path: String): MimeType? {
+            return MimeType.values().findLast { mime ->
+                null != mime.extensions.findLast { ext ->
+                    path.endsWith(ext)
+                }
+            }
+        }
     }
 }

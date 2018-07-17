@@ -77,9 +77,8 @@ class PickActivity : AppCompatActivity() {
                         PickUtils.launchCrop(this@PickActivity)
                         return
                     } else {
-                        PickUtils.saveToAlbum(baseContext, file) {
-                            picker.callbacks().invoke(picker.action(), listOf(it))
-                        }
+                        val uri: Uri = PickUtils.saveToAlbum(baseContext, file)
+                        picker.callbacks().invoke(picker.action(), listOf(uri))
                     }
                 }
                 finish()
@@ -102,9 +101,8 @@ class PickActivity : AppCompatActivity() {
             PickUtils.REQUEST_CODE_CROP -> {
                 val file: File? = PickControl.obtain(false).cropFile()
                 if (null != file) {
-                    PickUtils.saveToAlbum(baseContext, file) {
-                        PickControl.obtain(false).callbacks().invoke(picker.action(), listOf(it))
-                    }
+                    val uri: Uri = PickUtils.saveToAlbum(baseContext, file)
+                    PickControl.obtain(false).callbacks().invoke(picker.action(), listOf(uri))
                 }
                 finish()
             }

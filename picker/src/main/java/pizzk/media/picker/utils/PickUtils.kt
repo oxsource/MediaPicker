@@ -3,6 +3,7 @@ package pizzk.media.picker.utils
 import android.Manifest
 import android.app.Activity
 import android.content.ContentResolver
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -27,8 +28,6 @@ import pizzk.media.picker.entity.AlbumSection
 import pizzk.media.picker.view.AlbumActivity
 import pizzk.media.picker.view.PreviewActivity
 import java.io.File
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 
 
 /**
@@ -85,7 +84,7 @@ object PickUtils {
         }
         if (!access) return
         val picker: PickControl = PickControl.obtain(false)
-        val uris: List<Uri> = picker.selects().mapNotNull(PickUtils::parsePath)
+        val uris: List<Uri> = picker.selects().mapNotNull(PickUtils::path2Uri)
         val limit: Int = picker.limit()
         AlbumActivity.show(activity, limit, uris)
     }
@@ -236,62 +235,56 @@ object PickUtils {
     }
 
     //将图像保存至系统相册
-    fun saveToAlbum(context: Context, file: File, block: (Uri) -> Unit) {
-        doAsync {
-            val fileUri: Uri = Uri.fromFile(file)
-            val uri: Uri = try {
-                val uriPath: String = MediaStore.Images.Media.insertImage(context.contentResolver, file.absolutePath, file.name, "")
-                context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, fileUri))
-                Uri.parse(uriPath)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                fileUri
-            }
-            uiThread {
-                block(uri)
-            }
+    fun saveToAlbum(context: Context, file: File): Uri {
+        val fileUri: Uri = Uri.fromFile(file)
+        return try {
+            val values = ContentValues()
+            val mime: String = getImageMime(context, file.absolutePath)
+            values.put(MediaStore.Images.Media.DATA, file.absolutePath)
+            values.put(MediaStore.Images.Media.MIME_TYPE, mime)
+            val uri: Uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, fileUri))
+            uri
+        } catch (e: Exception) {
+            e.printStackTrace()
+            fileUri
         }
     }
 
     //获取图片的Mime
-    fun getImageMime(context: Context, uri: Uri): String {
+    fun getImageMime(context: Context, path: String): String {
+        val mime: String = MimeType.getMimeByPath(path)?.mime ?: ""
+        if (mime.isNotEmpty()) return mime
+        if (!path.startsWith("content://")) return mime
+        val uri: Uri = Uri.parse(path)
         val projection: Array<String> = arrayOf(MediaStore.Images.Media.MIME_TYPE)
         val resolver: ContentResolver = context.contentResolver
         var cursor: Cursor? = null
         return try {
             cursor = resolver.query(uri, projection, null, null, null)
-            if (cursor.moveToFirst()) cursor.getString(0) else ""
+            if (cursor.moveToFirst()) cursor.getString(0) else mime
         } catch (e: Exception) {
             e.printStackTrace()
-            ""
+            mime
         } finally {
             cursor?.close()
         }
     }
 
     //通过path获取Uri
-    fun parsePath(path: String): Uri? {
-        val uri: Uri? = try {
-            Uri.parse(path)
-        } catch (e: Exception) {
-            null
-        }
-        if (null != uri) return uri
+    private fun path2Uri(path: String): Uri? {
         return try {
+            val prefix: Array<String> = arrayOf("content://", "file://")
+            for (p: String in prefix) {
+                if (path.startsWith(p)) {
+                    return Uri.parse(path)
+                }
+            }
             val file = File(path)
-            if (file.exists()) Uri.fromFile(file) else null
+            if (file.isFile) Uri.fromFile(file) else null
         } catch (e: Exception) {
+            e.printStackTrace()
             null
-        }
-    }
-
-    //获取图片的Mime
-    fun getImageMime(context: Context, path: String): String {
-        return try {
-            val uri: Uri = parsePath(path)!!
-            return PickUtils.getImageMime(context, uri)
-        } catch (e: Exception) {
-            MimeType.JPEG.mime
         }
     }
 
