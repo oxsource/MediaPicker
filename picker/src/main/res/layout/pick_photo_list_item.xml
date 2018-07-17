@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                             xmlns:app="http://schemas.android.com/apk/res-auto"
-                                             android:layout_width="wrap_content"
-                                             android:layout_height="wrap_content"
-                                             android:background="@color/color_white"
-                                             android:minHeight="@dimen/pick_photo_min_size"
-                                             android:minWidth="@dimen/pick_photo_min_size"
-                                             android:orientation="vertical">
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/color_white"
+    android:minHeight="@dimen/pick_photo_min_size"
+    android:minWidth="@dimen/pick_photo_min_size"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:orientation="vertical">
 
     <ImageView
         android:id="@+id/imgHint"

@@ -57,8 +57,5 @@ abstract class CommonListAdapter<T>(protected val context: Context) : RecyclerVi
 
     companion object {
         const val WHAT0: Int = 100
-        const val WHAT1: Int = 101
-        const val WHAT2: Int = 102
-        const val WHAT3: Int = 103
     }
 }

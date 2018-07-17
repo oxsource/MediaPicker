@@ -11,7 +11,6 @@ import android.content.pm.ResolveInfo
 import android.content.res.Resources
 import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.FileProvider
@@ -302,7 +301,6 @@ object PickUtils {
 
     //隐藏状态栏
     fun hideSystemStatusBar(activity: Activity?): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return false
         activity ?: return false
         val decorView: View = activity.window.decorView
         val flag: Boolean = 0 == (decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
@@ -318,7 +316,6 @@ object PickUtils {
 
     //显示状态栏
     fun showSystemStatusBar(activity: Activity?): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return false
         activity ?: return false
         val decorView: View = activity.window.decorView
         decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
