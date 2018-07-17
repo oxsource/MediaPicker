@@ -42,6 +42,7 @@ object PickUtils {
     //返回结果标志
     private const val KEY_RESULT_DATA: String = "key_result_data"
     private const val KEY_FINISH_FLAG: String = "key_finish_flag"
+    private const val KEY_NAVIGATION_FLAG: String = "key_navigation_flag"
 
     private val cameraPermission: Array<String> = arrayOf(
             Manifest.permission.CAMERA,
@@ -304,9 +305,11 @@ object PickUtils {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return false
         activity ?: return false
         val decorView: View = activity.window.decorView
+        val flag: Boolean = 0 == (decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+        activity.intent.putExtra(KEY_NAVIGATION_FLAG, flag)
         decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
                 or View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                 or View.SYSTEM_UI_FLAG_IMMERSIVE)
@@ -319,8 +322,10 @@ object PickUtils {
         activity ?: return false
         val decorView: View = activity.window.decorView
         decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+        if (!activity.intent.getBooleanExtra(KEY_NAVIGATION_FLAG, false)) {
+            decorView.systemUiVisibility = decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        }
         return true
     }
 

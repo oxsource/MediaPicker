@@ -64,6 +64,8 @@ class PreviewActivity : AppCompatActivity() {
     private var finishFlag: Boolean = false
     //可见性
     private var overlayFlag: Boolean = true
+    //导航栏标记
+    private var withNavFlag: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
