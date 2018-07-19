@@ -34,15 +34,15 @@ class PhotoGroupView : RecyclerView {
             context.getString(R.string.pick_chose_album)
     )
 
-    fun build(special: Special, history: List<String>? = null, changed: (PhotoGroupAdapter) -> Unit = {}) {
+    fun setup(special: Special, history: List<String>? = null, changed: (PhotoGroupAdapter) -> Unit = {}) {
         val manager = object : GridLayoutManager(context, special.column) {
             override fun isAutoMeasureEnabled(): Boolean = true
         }
         this.layoutManager = manager
         val pAdapter = PhotoGroupAdapter(context, special.fixed, special.lp)
         pAdapter.setChangeBlock(changed)
-        if (null != history && history.isNotEmpty()) {
-            pAdapter.update(history, special.limit)
+        if (!pAdapter.update(history, special.limit)) {
+            changed(pAdapter)
         }
         this.adapter = pAdapter
         //配置Adapter

@@ -57,9 +57,9 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
     }
 
     //更新图片
-    fun update(list: List<String>?, limit: Int) {
-        if (limit <= 0) return
-        if (null == list || list.isEmpty()) return
+    fun update(list: List<String>?, limit: Int): Boolean {
+        if (limit <= 0) return false
+        if (null == list || list.isEmpty()) return false
         if (isAppend) {
             getList().clear()
             for (i: Int in 0 until min(limit, list.size)) {
@@ -76,6 +76,7 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
         }
         notifyDataSetChanged()
         changeBlock(this)
+        return true
     }
 
     fun selects(): List<String> {
