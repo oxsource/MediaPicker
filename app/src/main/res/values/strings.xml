@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MediaPicker</string>
+    <string name="app_name">MEDIA PICKER</string>
     <string name="file_provider">pizzk.media.picker.demo.file.provider</string>
     <string name="pick_demo_show">选择照片演示</string>
 </resources>
