@@ -18,6 +18,7 @@ import pizzk.media.picker.view.PickChoseActivity
  * 选取一组照片的视图
  */
 class PhotoGroupView : RecyclerView {
+    var choseAble: Boolean = true
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -48,6 +49,7 @@ class PhotoGroupView : RecyclerView {
         //配置Adapter
         PickControl.authority(special.authority)
         pAdapter.setTapBlock { _, index ->
+            if (!choseAble) return@setTapBlock
             val el: PhotoItem = pAdapter.getList()[index]
             val selects: List<String> = pAdapter.selects()
             if (el.path.isEmpty()) {
