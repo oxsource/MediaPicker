@@ -18,7 +18,6 @@ import pizzk.media.picker.view.PickChoseActivity
  * 选取一组照片的视图
  */
 class PhotoGroupView : RecyclerView {
-    var choseAble: Boolean = true
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -35,24 +34,26 @@ class PhotoGroupView : RecyclerView {
             context.getString(R.string.pick_chose_album)
     )
 
-    fun setup(special: Special, history: List<String>? = null, changed: (PhotoGroupAdapter) -> Unit = {}) {
+    fun setup(special: Special, exists: List<String>? = null, readOnly: Boolean,
+              changed: (PhotoGroupAdapter) -> Unit = {}) {
         val manager = object : GridLayoutManager(context, special.column) {
             override fun isAutoMeasureEnabled(): Boolean = true
         }
         this.layoutManager = manager
         val pAdapter = PhotoGroupAdapter(context, special.fixed, special.lp)
+        pAdapter.setReadOnly(readOnly)
         pAdapter.setChangeBlock(changed)
-        if (!pAdapter.update(history, special.limit)) {
+        if (!pAdapter.update(exists, special.limit)) {
             changed(pAdapter)
         }
         this.adapter = pAdapter
         //配置Adapter
         PickControl.authority(special.authority)
         pAdapter.setTapBlock { _, index ->
-            if (!choseAble) return@setTapBlock
             val el: PhotoItem = pAdapter.getList()[index]
             val selects: List<String> = pAdapter.selects()
             if (el.path.isEmpty()) {
+                if (pAdapter.isReadOnly()) return@setTapBlock
                 //选择图片
                 PickChoseActivity.show(special.activity, choiceList) { key ->
                     showPickPhoto(special.activity, key, selects, special.limit, pAdapter)

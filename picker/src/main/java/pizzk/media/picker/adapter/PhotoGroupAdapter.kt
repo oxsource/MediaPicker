@@ -13,8 +13,8 @@ import kotlin.math.min
 
 class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewGroup.LayoutParams)
     : CommonListAdapter<PhotoItem>(context) {
-
-    val isAppend: Boolean
+    private var readOnly: Boolean = false
+    private val isAppend: Boolean
     private val lp: ViewGroup.LayoutParams
     private var changeBlock: (PhotoGroupAdapter) -> Unit = { _ -> }
 
@@ -29,6 +29,13 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
         this.lp = lp
     }
 
+    fun setReadOnly(value: Boolean) {
+        if (value == readOnly) return
+        readOnly = value
+        notifyDataSetChanged()
+    }
+
+    fun isReadOnly() = readOnly
 
     fun setChangeBlock(block: (PhotoGroupAdapter) -> Unit) {
         this.changeBlock = block
@@ -112,7 +119,7 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
         } else {
             holder.setVisibility(R.id.imgHint, View.GONE)
             holder.setVisibility(R.id.imgTarget, View.VISIBLE)
-            holder.setVisibility(R.id.imgDelete, View.VISIBLE)
+            holder.setVisibility(R.id.imgDelete, if (readOnly) View.GONE else View.VISIBLE)
             holder.setClickListen(R.id.imgDelete) { tapChild(holder, it, position, WHAT0) }
             val iv: ImageView = holder.getView(R.id.imgTarget)!!
             val mime: String = PickUtils.getImageMime(context, el.path)

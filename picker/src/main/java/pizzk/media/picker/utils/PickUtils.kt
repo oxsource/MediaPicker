@@ -269,7 +269,7 @@ object PickUtils {
         if (!path.startsWith("content://")) return mime
         val uri: Uri = Uri.parse(path)
         val projection: Array<String> = arrayOf(MediaStore.Images.Media.MIME_TYPE)
-        val resolver: ContentResolver = context.contentResolver
+        val resolver: ContentResolver = context.applicationContext.contentResolver
         var cursor: Cursor? = null
         return try {
             cursor = resolver.query(uri, projection, null, null, null)
@@ -296,6 +296,31 @@ object PickUtils {
         } catch (e: Exception) {
             e.printStackTrace()
             null
+        }
+    }
+
+    fun filePath(context: Context?, path: String): String {
+        context ?: return ""
+        val prefix: Array<String> = arrayOf("content://", "file://")
+        var isUri = false
+        for (p: String in prefix) {
+            if (path.startsWith(p)) {
+                isUri = true
+            }
+        }
+        if (!isUri) return path
+        var cursor: Cursor? = null
+        return try {
+            val uri: Uri = Uri.parse(path)
+            val projection: Array<String> = arrayOf(MediaStore.MediaColumns.DATA)
+            val resolver: ContentResolver = context.applicationContext.contentResolver
+            cursor = resolver.query(uri, projection, null, null, null)
+            if (cursor.moveToFirst()) cursor.getString(0) else ""
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ""
+        } finally {
+            cursor?.close()
         }
     }
 
