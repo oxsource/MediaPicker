@@ -102,7 +102,7 @@ object PickUtils {
         if (!access) return
         val picker: PickControl = PickControl.obtain(false)
         val uris: List<Uri> = picker.selects().mapNotNull(PickUtils::path2Uri)
-        val limit: Int = picker.limit()
+        val limit: Int = picker.limit() - picker.selects().size
         AlbumActivity.show(activity, limit, uris)
     }
 
@@ -283,7 +283,7 @@ object PickUtils {
     }
 
     //通过path获取Uri
-    private fun path2Uri(path: String): Uri? {
+    fun path2Uri(path: String): Uri? {
         return try {
             val prefix: Array<String> = arrayOf("content://", "file://")
             for (p: String in prefix) {

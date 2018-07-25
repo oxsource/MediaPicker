@@ -12,6 +12,7 @@ import pizzk.media.picker.adapter.CommonListAdapter
 import pizzk.media.picker.adapter.PhotoGroupAdapter
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.entity.PhotoItem
+import pizzk.media.picker.utils.PickUtils
 import pizzk.media.picker.view.PickChoseActivity
 
 /**
@@ -103,7 +104,11 @@ class PhotoGroupView : RecyclerView {
                         allOf.addAll(list.map(Uri::toString))
                         adapter.update(allOf, limit)
                     } else {
-                        adapter.update(list.map(Uri::toString), limit)
+                        val remotes: List<String> = selects.filter { null == PickUtils.path2Uri(it) }
+                        val allOf: MutableList<String> = ArrayList(limit)
+                        allOf.addAll(remotes)
+                        allOf.addAll(list.map(Uri::toString))
+                        adapter.update(allOf, limit)
                     }
                 }.done(activity)
     }
