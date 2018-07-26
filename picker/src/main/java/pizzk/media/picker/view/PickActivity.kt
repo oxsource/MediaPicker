@@ -75,13 +75,12 @@ class PickActivity : AppCompatActivity() {
             PickUtils.REQUEST_CODE_CAMERA -> {
                 val file: File? = PickControl.obtain(false).cameraFile()
                 if (null != file) {
+                    val uri: Uri = PickUtils.saveToAlbum(baseContext, file)
                     if (null != picker.crop() && picker.limit() == 1) {
-                        //选择单张图片且需要裁剪
-                        picker.crop()!!.uri = Uri.fromFile(file)
+                        picker.crop()!!.uri = uri
                         PickUtils.launchCrop(this@PickActivity)
                         return
                     } else {
-                        val uri: Uri = PickUtils.saveToAlbum(baseContext, file)
                         picker.callbacks().invoke(picker.action(), listOf(uri))
                     }
                 }
@@ -90,7 +89,6 @@ class PickActivity : AppCompatActivity() {
             PickUtils.REQUEST_CODE_ALBUM -> {
                 val uris: List<Uri> = PickUtils.obtainResultUris(data)
                 if (null != picker.crop() && picker.limit() == 1 && uris.isNotEmpty()) {
-                    //选择单张图片且需要裁剪
                     picker.crop()!!.uri = uris[0]
                     PickUtils.launchCrop(this@PickActivity)
                     return
