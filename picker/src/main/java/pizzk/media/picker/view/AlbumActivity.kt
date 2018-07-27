@@ -55,7 +55,6 @@ class AlbumActivity : AppCompatActivity() {
     //标志位
     private var useOriginPhoto: Boolean = false
     private var finishFlag: Boolean = false
-    private var selectLimit: Int = 0
     //动画
     private var animHideSection: AnimatorSet? = null
     private var animShowSection: AnimatorSet? = null
@@ -69,14 +68,14 @@ class AlbumActivity : AppCompatActivity() {
 
     //初始化适配器
     private fun setupAdapter() {
-        selectLimit = intent.getIntExtra(KEY_SELECT_LIMIT, selectLimit)
         val selectUris: List<Uri> = intent.getParcelableArrayListExtra(KEY_SELECT_DATA)
         //图片适配器
         photoAdapter = AlbumPhotoAdapter(baseContext)
+        photoAdapter.setSelectLimit(intent.getIntExtra(KEY_SELECT_LIMIT, 0))
         photoAdapter.setTapBlock { _, index ->
             val uris: List<String> = photoAdapter.getList().mapNotNull(AlbumItem::getUri).map(Uri::toString)
             val selects: List<String> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri).map(Uri::toString)
-            PreviewActivity.show(this@AlbumActivity, uris, selects, index, selectLimit)
+            PreviewActivity.show(this@AlbumActivity, uris, selects, index, photoAdapter.getSelectLimit())
         }
         //目录适配器
         sectionAdapter = AlbumSectionAdapter(baseContext)
@@ -158,7 +157,7 @@ class AlbumActivity : AppCompatActivity() {
                 val uris: List<String> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri).map(Uri::toString)
                 if (uris.isNotEmpty()) {
                     val selects: List<String> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri).map(Uri::toString)
-                    PreviewActivity.show(this@AlbumActivity, uris, selects, 0, selectLimit)
+                    PreviewActivity.show(this@AlbumActivity, uris, selects, 0, photoAdapter.getSelectLimit())
                 }
             }
             sectionMask -> {
@@ -216,7 +215,7 @@ class AlbumActivity : AppCompatActivity() {
             doneButton.enable(false)
         } else {
             tvPreview.text = String.format(getString(R.string.pick_media_preview_format), list.size)
-            doneButton.item().title = String.format(getString(R.string.pick_media_finish_format), list.size, selectLimit)
+            doneButton.item().title = String.format(getString(R.string.pick_media_finish_format), list.size, photoAdapter.getSelectLimit())
             doneButton.enable(true)
         }
     }

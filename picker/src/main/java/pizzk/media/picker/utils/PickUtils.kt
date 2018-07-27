@@ -102,7 +102,9 @@ object PickUtils {
         if (!access) return
         val picker: PickControl = PickControl.obtain(false)
         val uris: List<Uri> = picker.selects().mapNotNull(PickUtils::path2Uri)
-        val limit: Int = picker.limit() - picker.selects().size
+        val invalidCount: Int = picker.selects().size - uris.size
+        //去除非本地的图片计数
+        val limit: Int = picker.limit() - invalidCount
         AlbumActivity.show(activity, limit, uris)
     }
 

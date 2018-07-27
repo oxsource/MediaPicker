@@ -11,6 +11,7 @@ import pizzk.media.picker.entity.AlbumItem
 class AlbumPhotoAdapter(context: Context) : CommonListAdapter<AlbumItem>(context) {
     private val selectedList: MutableList<AlbumItem> = ArrayList()
     private var selectBlock: (List<AlbumItem>) -> Unit = { _ -> }
+    private var selectLimit: Int = 0
 
     override fun getLayoutId(viewType: Int): Int = R.layout.album_photo_item
 
@@ -33,10 +34,9 @@ class AlbumPhotoAdapter(context: Context) : CommonListAdapter<AlbumItem>(context
                 selectBlock(getSelectList())
                 return@setOnClickListener
             }
-            val limit: Int = PickControl.obtain(false).limit()
-            if (selectedList.size >= limit) {
+            if (selectedList.size >= selectLimit) {
                 val hint: String = context.getString(R.string.pick_media_most_select_limit)
-                val content: String = String.format(hint, limit)
+                val content: String = String.format(hint, selectLimit)
                 Toast.makeText(context, content, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -45,6 +45,13 @@ class AlbumPhotoAdapter(context: Context) : CommonListAdapter<AlbumItem>(context
             selectBlock(getSelectList())
         }
     }
+
+    fun setSelectLimit(value: Int) {
+        if (value < 0 || value == selectLimit) return
+        selectLimit = value
+    }
+
+    fun getSelectLimit() = selectLimit
 
     //更新选中状态
     private fun updateCheckState(item: AlbumItem, view: ImageView, mask: View) {
