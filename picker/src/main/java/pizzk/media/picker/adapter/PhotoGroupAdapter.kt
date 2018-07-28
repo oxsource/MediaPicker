@@ -14,7 +14,7 @@ import kotlin.math.min
 class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewGroup.LayoutParams)
     : CommonListAdapter<PhotoItem>(context) {
     private var readOnly: Boolean = false
-    private val isAppend: Boolean
+    val isAppend: Boolean
     private val lp: ViewGroup.LayoutParams
     private var changeBlock: (PhotoGroupAdapter) -> Unit = { _ -> }
 
@@ -43,16 +43,12 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
 
     //删除指定位置图片
     fun delete(index: Int) {
-        if (index !in 0 until itemCount) return
+        if (index < 0 || index >= getList().size) return
         val el: PhotoItem = getList()[index]
-        if (!isAppend) {
+        if (!isAppend || 1 == getList().size) {
             el.path = ""
             notifyItemChanged(index)
-            return
-        }
-        if (1 == getList().size) {
-            el.path = ""
-            notifyItemChanged(index)
+            changeBlock(this)
             return
         }
         remove(index)
@@ -64,7 +60,7 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
     }
 
     //更新图片
-    fun update(list: List<String>?, limit: Int): Boolean {
+    fun update(list: List<String>?, limit: Int, index: Int = -1): Boolean {
         if (limit <= 0) return false
         if (null == list || list.isEmpty()) return false
         if (isAppend) {
@@ -76,12 +72,15 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
             if (getList().size < limit) {
                 getList().add(PhotoItem())
             }
+            notifyDataSetChanged()
         } else {
-            for (i: Int in 0 until min(getList().size, list.size)) {
-                getList()[i].path = list[i]
+            if (index >= 0 && index < getList().size) {
+                getList()[index].path = list.first()
+                notifyItemChanged(index)
+            } else {
+                return false
             }
         }
-        notifyDataSetChanged()
         changeBlock(this)
         return true
     }
@@ -91,7 +90,7 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
         val list: MutableList<String> = ArrayList(size)
         for (i: Int in 0 until getList().size) {
             val el: String = getList()[i].path
-            if (!TextUtils.isEmpty(el)) {
+            if (!isAppend || !TextUtils.isEmpty(el)) {
                 list.add(el)
             }
         }
