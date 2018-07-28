@@ -85,19 +85,21 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
         return true
     }
 
-    fun selects(): List<String> {
+    fun selectItems(): List<PhotoItem> {
         val size: Int = selectCount()
-        val list: MutableList<String> = ArrayList(size)
+        val list: MutableList<PhotoItem> = ArrayList(size)
         for (i: Int in 0 until getList().size) {
-            val el: String = getList()[i].path
-            if (!isAppend || !TextUtils.isEmpty(el)) {
-                list.add(el)
+            val path: String = getList()[i].path
+            if (!isAppend || !TextUtils.isEmpty(path)) {
+                list.add(getList()[i])
             }
         }
         return list
     }
 
-    fun selectCount() = getList().count { !TextUtils.isEmpty(it.path) }
+    fun selectPaths(): List<String> = selectItems().map { it.path }
+
+    fun selectCount() = if (isAppend) getList().count { !TextUtils.isEmpty(it.path) } else getList().size
 
     override fun getLayoutId(viewType: Int): Int = R.layout.pick_photo_list_item
 

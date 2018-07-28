@@ -55,13 +55,13 @@ class PhotoGroupView : RecyclerView {
             if (el.path.isEmpty()) {
                 if (pAdapter.isReadOnly()) return@setTapBlock
                 //选择图片
-                val selects: List<String> = if (pAdapter.isAppend) pAdapter.selects() else emptyList()
+                val selects: List<String> = if (pAdapter.isAppend) pAdapter.selectPaths() else emptyList()
                 PickChoseActivity.show(special.activity, choiceList) { key ->
                     showPickPhoto(special.activity, key, selects, special.limit, pAdapter, index)
                 }
             } else {
                 //预览
-                val selects: List<String> = if (pAdapter.isAppend) pAdapter.selects() else arrayListOf(el.path)
+                val selects: List<String> = if (pAdapter.isAppend) pAdapter.selectPaths() else arrayListOf(el.path)
                 showPreview(special.activity, selects, if (pAdapter.isAppend) index else 0)
             }
         }
@@ -101,7 +101,7 @@ class PhotoGroupView : RecyclerView {
                 .callback { code, list ->
                     if (code == PickControl.ACTION_CAMERA) {
                         val allOf: MutableList<String> = ArrayList(adapter.selectCount() + 1)
-                        allOf.addAll(adapter.selects())
+                        allOf.addAll(adapter.selectPaths())
                         allOf.addAll(list.map(Uri::toString))
                         adapter.update(allOf, limit, index)
                     } else {
