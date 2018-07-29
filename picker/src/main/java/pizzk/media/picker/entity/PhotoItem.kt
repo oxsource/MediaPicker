@@ -5,7 +5,7 @@ import android.os.Parcelable
 
 data class PhotoItem(
         var path: String = "",
-        var desc: String = "",
+        var desc: String? = null,
         var which: Int = -1
 ) : Parcelable {
     constructor(parcel: Parcel) : this(

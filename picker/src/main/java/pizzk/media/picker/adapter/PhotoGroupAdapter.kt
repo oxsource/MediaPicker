@@ -110,8 +110,12 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
             holder.setVisibility(R.id.tvHint, View.GONE)
             holder.setText(R.id.tvHint, "")
         } else {
-            holder.setVisibility(R.id.tvHint, View.VISIBLE)
-            holder.setText(R.id.tvHint, el.desc)
+            if (null == el.desc) {
+                holder.setVisibility(R.id.tvHint, View.GONE)
+            } else {
+                holder.setVisibility(R.id.tvHint, View.VISIBLE)
+                holder.setText(R.id.tvHint, el.desc)
+            }
         }
         if (el.path.isEmpty()) {
             holder.setVisibility(R.id.imgHint, View.VISIBLE)
