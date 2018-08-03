@@ -88,8 +88,7 @@ class PreviewActivity : AppCompatActivity() {
         selectLimit = intent.getIntExtra(PreviewActivity.KEY_SELECT_LIMIT, selectLimit)
         val selects: List<String> = intent.getStringArrayListExtra(PreviewActivity.KEY_SELECT_DATA)
         selectAdapter = PreviewSelectAdapter(baseContext, selects)
-        selectAdapter.setClickListener {
-            val path: String = it
+        selectAdapter.setClickListener { path ->
             val targetPath: String? = photoAdapter.getList().findLast { it == path }
             val selectIndex: Int = targetPath?.let { photoAdapter.getList().indexOf(it) } ?: -1
             if (selectIndex < 0) return@setClickListener

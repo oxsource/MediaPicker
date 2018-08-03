@@ -49,7 +49,6 @@ class PhotoGroupView : RecyclerView {
         }
         this.adapter = pAdapter
         //配置Adapter
-        PickControl.authority(special.authority)
         pAdapter.setTapBlock { _, index ->
             val el: PhotoItem = pAdapter.getList()[index]
             if (el.path.isEmpty()) {
@@ -119,7 +118,6 @@ class PhotoGroupView : RecyclerView {
             var activity: Activity,
             var lp: ViewGroup.LayoutParams,
             var limit: Int = 1,
-            var authority: String = "",
             var column: Int = 4,
             var fixed: MutableList<PhotoItem>? = null
     )
