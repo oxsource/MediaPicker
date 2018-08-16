@@ -4,6 +4,7 @@ import android.os.Parcel
 import android.os.Parcelable
 
 data class PhotoItem(
+        var key: String = "",
         var path: String = "",
         var desc: String? = null,
         var which: Int = -1
@@ -11,10 +12,12 @@ data class PhotoItem(
     constructor(parcel: Parcel) : this(
             parcel.readString(),
             parcel.readString(),
+            parcel.readString(),
             parcel.readInt()) {
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(key)
         parcel.writeString(path)
         parcel.writeString(desc)
         parcel.writeInt(which)
@@ -33,4 +36,5 @@ data class PhotoItem(
             return arrayOfNulls(size)
         }
     }
+
 }
