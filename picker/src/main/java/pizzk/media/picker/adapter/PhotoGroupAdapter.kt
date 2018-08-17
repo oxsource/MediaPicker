@@ -69,7 +69,7 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
                 getList().add(PhotoItem(path = list[i]))
             }
             //判断是否还可选
-            if (getList().size < limit) {
+            if (!readOnly && getList().size < limit) {
                 getList().add(PhotoItem())
             }
             notifyDataSetChanged()
