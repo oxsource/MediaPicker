@@ -18,7 +18,7 @@ object PickPhotoHelper {
                 activity.getString(R.string.pick_chose_camera),
                 activity.getString(R.string.pick_chose_album)
         )
-        PickChoseActivity.show(activity, choiceList) { key ->
+        PickChoseActivity.show(activity, choiceList) shown@{ key ->
             val action: Int = when (key) {
                 choiceList[0] -> {
                     PickControl.ACTION_CAMERA
@@ -28,7 +28,7 @@ object PickPhotoHelper {
                 }
                 else -> -1
             }
-            if (action < 0) return@show
+            if (action < 0) return@shown
             PickControl.obtain(true)
                     .action(action)
                     .limit(limit)

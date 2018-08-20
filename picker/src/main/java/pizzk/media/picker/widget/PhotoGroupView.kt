@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import pizzk.media.picker.R
 import pizzk.media.picker.adapter.CommonListAdapter
 import pizzk.media.picker.adapter.PhotoGroupAdapter
+import pizzk.media.picker.arch.CropParams
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.entity.PhotoItem
 import pizzk.media.picker.utils.PickUtils
@@ -56,7 +57,7 @@ class PhotoGroupView : RecyclerView {
                 //选择图片
                 val selects: List<String> = if (pAdapter.isAppend) pAdapter.selectPaths() else emptyList()
                 PickChoseActivity.show(special.activity, choiceList) { key ->
-                    showPickPhoto(special.activity, key, selects, special.limit, pAdapter, index)
+                    showPickPhoto(special.activity, key, selects, special.limit, pAdapter, index,special.crop)
                 }
             } else {
                 //预览
@@ -83,7 +84,8 @@ class PhotoGroupView : RecyclerView {
     //跳转至选择图片
     private fun showPickPhoto(activity: Activity, key: String,
                               selects: List<String>, limit: Int,
-                              adapter: PhotoGroupAdapter, index: Int) {
+                              adapter: PhotoGroupAdapter, index: Int,
+                              crop: CropParams?) {
         val action: Int = when (key) {
             choiceList[0] -> {
                 PickControl.ACTION_CAMERA
@@ -97,6 +99,7 @@ class PhotoGroupView : RecyclerView {
         PickControl.obtain(true).action(action)
                 .selects(selects)
                 .limit(limit)
+                .crop(crop)
                 .callback { code, list ->
                     if (code == PickControl.ACTION_CAMERA) {
                         val allOf: MutableList<String> = ArrayList(adapter.selectCount() + 1)
@@ -119,6 +122,7 @@ class PhotoGroupView : RecyclerView {
             var lp: ViewGroup.LayoutParams,
             var limit: Int = 1,
             var column: Int = 4,
-            var fixed: MutableList<PhotoItem>? = null
+            var fixed: MutableList<PhotoItem>? = null,
+            var crop: CropParams? = null
     )
 }
