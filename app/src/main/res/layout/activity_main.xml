@@ -33,7 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvTitleMulti"
-        android:background="@color/album_item_mask"
+        android:background="#00ffffff"
         android:paddingBottom="@dimen/pick_media_activity_margin"
         android:paddingLeft="@dimen/pick_media_activity_margin"
         android:paddingRight="@dimen/pick_media_activity_margin"

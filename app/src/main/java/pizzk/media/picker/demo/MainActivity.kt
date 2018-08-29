@@ -19,14 +19,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        PickControl.authority(getString(R.string.file_provider))
         //多张选择示例
         val photoGroup: PhotoGroupView = findViewById(R.id.photoGroup)
         val size: Int = resources.getDimensionPixelSize(R.dimen.x75)
         val tvHint: TextView = findViewById(R.id.tvHint)
         val lp: ViewGroup.LayoutParams = ViewGroup.LayoutParams(size, size)
         val special: PhotoGroupView.Special = PhotoGroupView.Special(
-                this@MainActivity, lp = lp, limit = 4,
-                authority = getString(R.string.file_provider), column = 4
+                this@MainActivity, lp = lp, limit = 4, column = 4
         )
         photoGroup.setup(special, emptyList(), false) {
             tvHint.text = "(${it.selectCount()}/${special.limit})"
