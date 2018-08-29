@@ -3,7 +3,6 @@
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/album_item_background"
                 android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
@@ -22,6 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/vBottomLine"
         android:layout_below="@+id/vTopLine"
+        android:background="@color/album_item_background"
         android:overScrollMode="never"/>
 
     <View

@@ -20,7 +20,6 @@
     <color name="bottom_tool_text">#ffffff</color>
     <color name="pick_title_color">#ffffff</color>
     <!--图片拾取-->
-    <color name="pick_photo_background">@android:color/transparent</color>
     <color name="pick_photo_dash_line">#dcdcdc</color>
     <color name="pick_photo_solid_line">#e6e6e6</color>
     <color name="pick_photo_hint_text_color">#222222</color>
