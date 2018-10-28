@@ -57,7 +57,7 @@ class PhotoGroupView : RecyclerView {
                 //选择图片
                 val selects: List<String> = if (pAdapter.isAppend) pAdapter.selectPaths() else emptyList()
                 PickChoseActivity.show(special.activity, choiceList) { key ->
-                    showPickPhoto(special.activity, key, selects, special.limit, pAdapter, index,special.crop)
+                    showPickPhoto(special.activity, key, selects, special.limit, pAdapter, index, special.crop)
                 }
             } else {
                 //预览
@@ -96,22 +96,30 @@ class PhotoGroupView : RecyclerView {
             else -> -1
         }
         if (action < 0) return
-        PickControl.obtain(true).action(action)
+        PickControl.obtain(clean = true).action(action)
                 .selects(selects)
                 .limit(limit)
                 .crop(crop)
                 .callback { code, list ->
                     if (code == PickControl.ACTION_CAMERA) {
-                        val allOf: MutableList<String> = ArrayList(adapter.selectCount() + 1)
-                        allOf.addAll(adapter.selectPaths())
-                        allOf.addAll(list.map(Uri::toString))
-                        adapter.update(allOf, limit, index)
+                        if (adapter.isAppend) {
+                            val allOf: MutableList<String> = ArrayList(adapter.selectCount() + 1)
+                            allOf.addAll(adapter.selectPaths())
+                            allOf.addAll(list.map(Uri::toString))
+                            adapter.update(allOf, limit, index)
+                        } else {
+                            adapter.update(list.map(Uri::toString), limit, index)
+                        }
                     } else {
-                        val remotes: List<String> = selects.filter { null == PickUtils.path2Uri(it) }
-                        val allOf: MutableList<String> = ArrayList(limit)
-                        allOf.addAll(remotes)
-                        allOf.addAll(list.map(Uri::toString))
-                        adapter.update(allOf, limit, index)
+                        if (adapter.isAppend) {
+                            val remotes: List<String> = selects.filter { null == PickUtils.path2Uri(it) }
+                            val allOf: MutableList<String> = ArrayList(limit)
+                            allOf.addAll(remotes)
+                            allOf.addAll(list.map(Uri::toString))
+                            adapter.update(allOf, limit, index)
+                        } else {
+                            adapter.update(list.map(Uri::toString), limit, index)
+                        }
                     }
                 }.done(activity)
     }
