@@ -25,9 +25,7 @@ class MainActivity : AppCompatActivity() {
         val size: Int = resources.getDimensionPixelSize(R.dimen.x75)
         val tvHint: TextView = findViewById(R.id.tvHint)
         val lp: ViewGroup.LayoutParams = ViewGroup.LayoutParams(size, size)
-        val special: PhotoGroupView.Special = PhotoGroupView.Special(
-                this@MainActivity, lp = lp, limit = 4, column = 4
-        )
+        val special: PhotoGroupView.Special = PhotoGroupView.Special(this@MainActivity, lp = lp, limit = 4, column = 4)
         photoGroup.setup(special, emptyList(), false) {
             tvHint.text = "(${it.selectCount()}/${special.limit})"
         }
