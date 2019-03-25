@@ -15,6 +15,7 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
     : CommonListAdapter<PhotoItem>(context) {
     private var readOnly: Boolean = false
     val isAppend: Boolean
+    private var appendText: String = ""
     private val lp: ViewGroup.LayoutParams
     private var changeBlock: (PhotoGroupAdapter) -> Unit = { _ -> }
 
@@ -36,6 +37,10 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
     }
 
     fun isReadOnly() = readOnly
+
+    fun setAppendText(text: String) {
+        appendText = text
+    }
 
     fun setChangeBlock(block: (PhotoGroupAdapter) -> Unit) {
         this.changeBlock = block
@@ -107,15 +112,11 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
         holder.itemView.layoutParams = lp
         val el: PhotoItem = getList()[position]
         if (isAppend) {
-            holder.setVisibility(R.id.tvHint, View.GONE)
-            holder.setText(R.id.tvHint, "")
+            val isLast: Boolean = el.path.isEmpty() && position == getList().size - 1
+            holder.setText(R.id.tvHint, if (isLast) appendText else "")
         } else {
-            if (null == el.desc) {
-                holder.setVisibility(R.id.tvHint, View.GONE)
-            } else {
-                holder.setVisibility(R.id.tvHint, View.VISIBLE)
-                holder.setText(R.id.tvHint, el.desc)
-            }
+            val hintText: String = el.desc ?: ""
+            holder.setText(R.id.tvHint, hintText)
         }
         if (el.path.isEmpty()) {
             holder.setVisibility(R.id.imgHint, View.VISIBLE)

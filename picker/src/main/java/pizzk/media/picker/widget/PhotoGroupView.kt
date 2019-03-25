@@ -36,7 +36,10 @@ class PhotoGroupView : RecyclerView {
             context.getString(R.string.pick_chose_album)
     )
 
-    fun setup(special: Special, exists: List<String>? = null, readOnly: Boolean,
+    fun setup(special: Special,
+              exists: List<String>? = null,
+              readOnly: Boolean,
+              appendText: String = "",
               changed: (PhotoGroupAdapter) -> Unit = {}) {
         val manager = object : GridLayoutManager(context, special.column) {
             override fun isAutoMeasureEnabled(): Boolean = true
@@ -45,6 +48,7 @@ class PhotoGroupView : RecyclerView {
         val pAdapter = PhotoGroupAdapter(context, special.fixed, special.lp)
         pAdapter.setReadOnly(readOnly)
         pAdapter.setChangeBlock(changed)
+        pAdapter.setAppendText(appendText)
         if (!pAdapter.update(exists, special.limit)) {
             changed(pAdapter)
         }

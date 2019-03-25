@@ -22,11 +22,11 @@ class MainActivity : AppCompatActivity() {
         PickControl.authority(getString(R.string.file_provider))
         //多张选择示例
         val photoGroup: PhotoGroupView = findViewById(R.id.photoGroup)
-        val size: Int = resources.getDimensionPixelSize(R.dimen.x75)
+        val size: Int = resources.getDimensionPixelSize(R.dimen.x110)
         val tvHint: TextView = findViewById(R.id.tvHint)
-        val lp: ViewGroup.LayoutParams = ViewGroup.LayoutParams(size, size)
-        val special: PhotoGroupView.Special = PhotoGroupView.Special(this@MainActivity, lp = lp, limit = 4, column = 4)
-        photoGroup.setup(special, emptyList(), false) {
+        val lp: ViewGroup.LayoutParams = ViewGroup.LayoutParams(size, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val special: PhotoGroupView.Special = PhotoGroupView.Special(this@MainActivity, lp = lp, limit = 20, column = 4)
+        photoGroup.setup(special, emptyList(), readOnly = false, appendText = "添加文件") {
             tvHint.text = "(${it.selectCount()}/${special.limit})"
         }
         //单张选择示例
