@@ -23,4 +23,5 @@
     <dimen name="pick_photo_delete_margin">5dp</dimen>
     <dimen name="pick_chose_bkg_radius">2dp</dimen>
     <dimen name="pick_chose_split_line">0.1dp</dimen>
+    <dimen name="pick_choose_item_text_size">16sp</dimen>
 </resources>
