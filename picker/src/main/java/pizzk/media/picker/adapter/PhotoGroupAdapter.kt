@@ -17,7 +17,7 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
     val isAppend: Boolean
     private var appendText: String = ""
     private val lp: ViewGroup.LayoutParams
-    private var changeBlock: (PhotoGroupAdapter) -> Unit = { _ -> }
+    private var changeBlock: (PhotoGroupAdapter, Int) -> Unit = { _, _ -> }
 
     init {
         if (null == fixedList || fixedList.isEmpty()) {
@@ -42,7 +42,7 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
         appendText = text
     }
 
-    fun setChangeBlock(block: (PhotoGroupAdapter) -> Unit) {
+    fun setChangeBlock(block: (PhotoGroupAdapter, Int) -> Unit) {
         this.changeBlock = block
     }
 
@@ -53,7 +53,7 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
         if (!isAppend || 1 == getList().size) {
             el.path = ""
             notifyItemChanged(index)
-            changeBlock(this)
+            changeBlock(this, index)
             return
         }
         remove(index)
@@ -61,7 +61,7 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
             getList().add(PhotoItem())
         }
         notifyDataSetChanged()
-        changeBlock(this)
+        changeBlock(this, index)
     }
 
     //更新图片
@@ -86,7 +86,7 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
                 return false
             }
         }
-        changeBlock(this)
+        changeBlock(this, index)
         return true
     }
 

@@ -40,7 +40,7 @@ class PhotoGroupView : RecyclerView {
               exists: List<String>? = null,
               readOnly: Boolean,
               appendText: String = "",
-              changed: (PhotoGroupAdapter) -> Unit = {}) {
+              changed: (PhotoGroupAdapter, Int) -> Unit = { _, _ -> }) {
         val manager = object : GridLayoutManager(context, special.column) {
             override fun isAutoMeasureEnabled(): Boolean = true
         }
@@ -49,8 +49,8 @@ class PhotoGroupView : RecyclerView {
         pAdapter.setReadOnly(readOnly)
         pAdapter.setChangeBlock(changed)
         pAdapter.setAppendText(appendText)
-        if (!pAdapter.update(exists, special.limit)) {
-            changed(pAdapter)
+        if (!pAdapter.update(exists, special.limit, index = -1)) {
+            changed(pAdapter, -1)
         }
         this.adapter = pAdapter
         //配置Adapter
@@ -86,9 +86,12 @@ class PhotoGroupView : RecyclerView {
     }
 
     //跳转至选择图片
-    private fun showPickPhoto(activity: Activity, key: String,
-                              selects: List<String>, limit: Int,
-                              adapter: PhotoGroupAdapter, index: Int,
+    private fun showPickPhoto(activity: Activity,
+                              key: String,
+                              selects: List<String>,
+                              limit: Int,
+                              adapter: PhotoGroupAdapter,
+                              index: Int,
                               crop: CropParams?) {
         val action: Int = when (key) {
             choiceList[0] -> {
@@ -100,32 +103,34 @@ class PhotoGroupView : RecyclerView {
             else -> -1
         }
         if (action < 0) return
+        val block: (Int, List<Uri>) -> Unit = { code, list ->
+            if (code == PickControl.ACTION_CAMERA) {
+                if (adapter.isAppend) {
+                    val allOf: MutableList<String> = ArrayList(adapter.selectCount() + 1)
+                    allOf.addAll(adapter.selectPaths())
+                    allOf.addAll(list.map(Uri::toString))
+                    adapter.update(allOf, limit, index)
+                } else {
+                    adapter.update(list.map(Uri::toString), limit, index)
+                }
+            } else {
+                if (adapter.isAppend) {
+                    val remotes: List<String> = selects.filter { null == PickUtils.path2Uri(it) }
+                    val allOf: MutableList<String> = ArrayList(limit)
+                    allOf.addAll(remotes)
+                    allOf.addAll(list.map(Uri::toString))
+                    adapter.update(allOf, limit, index)
+                } else {
+                    adapter.update(list.map(Uri::toString), limit, index)
+                }
+            }
+        }
         PickControl.obtain(clean = true).action(action)
                 .selects(selects)
                 .limit(limit)
                 .crop(crop)
-                .callback { code, list ->
-                    if (code == PickControl.ACTION_CAMERA) {
-                        if (adapter.isAppend) {
-                            val allOf: MutableList<String> = ArrayList(adapter.selectCount() + 1)
-                            allOf.addAll(adapter.selectPaths())
-                            allOf.addAll(list.map(Uri::toString))
-                            adapter.update(allOf, limit, index)
-                        } else {
-                            adapter.update(list.map(Uri::toString), limit, index)
-                        }
-                    } else {
-                        if (adapter.isAppend) {
-                            val remotes: List<String> = selects.filter { null == PickUtils.path2Uri(it) }
-                            val allOf: MutableList<String> = ArrayList(limit)
-                            allOf.addAll(remotes)
-                            allOf.addAll(list.map(Uri::toString))
-                            adapter.update(allOf, limit, index)
-                        } else {
-                            adapter.update(list.map(Uri::toString), limit, index)
-                        }
-                    }
-                }.done(activity)
+                .callback(block)
+                .done(activity)
     }
 
     //指定参数
