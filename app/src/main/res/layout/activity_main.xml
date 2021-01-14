@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,22 +11,22 @@
         android:id="@+id/tvTitleMulti"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/pick_media_activity_margin"
+        android:layout_marginStart="@dimen/pick_media_activity_margin"
         android:layout_marginTop="90dp"
         android:layout_marginBottom="@dimen/pick_media_activity_margin"
         android:text="@string/pick_demo_show"
         android:textColor="@color/pick_chose_text_color"
-        android:textSize="18sp"/>
+        android:textSize="18sp" />
 
     <TextView
         android:id="@+id/tvHint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/tvTitleMulti"
-        android:layout_toRightOf="@+id/tvTitleMulti"
+        android:layout_toEndOf="@+id/tvTitleMulti"
         android:text=""
         android:textColor="@color/pick_chose_text_color"
-        android:textSize="18sp"/>
+        android:textSize="18sp" />
 
     <pizzk.media.picker.widget.PhotoGroupView
         android:id="@+id/photoGroup"
@@ -34,30 +34,31 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvTitleMulti"
         android:background="#00ffffff"
-        android:paddingLeft="@dimen/pick_media_activity_margin"
+        android:paddingStart="@dimen/pick_media_activity_margin"
         android:paddingTop="@dimen/pick_media_activity_margin"
-        android:paddingRight="@dimen/pick_media_activity_margin"
-        android:paddingBottom="@dimen/pick_media_activity_margin"/>
+        android:paddingEnd="@dimen/pick_media_activity_margin"
+        android:paddingBottom="@dimen/pick_media_activity_margin"
+        app:space="2dp" />
 
     <TextView
         android:id="@+id/tvTitleSingle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/photoGroup"
-        android:layout_marginLeft="@dimen/pick_media_activity_margin"
+        android:layout_marginStart="@dimen/pick_media_activity_margin"
         android:layout_marginTop="25dp"
         android:layout_marginBottom="@dimen/pick_media_activity_margin"
         android:text="@string/pick_sigle_photo"
         android:textColor="@color/pick_chose_text_color"
-        android:textSize="18sp"/>
+        android:textSize="18sp" />
 
     <ImageView
         android:id="@+id/ivSingle"
         android:layout_width="90dp"
         android:layout_height="90dp"
         android:layout_below="@+id/tvTitleSingle"
-        android:layout_marginLeft="@dimen/pick_media_activity_margin"
+        android:layout_marginStart="@dimen/pick_media_activity_margin"
         android:background="@color/pick_chose_text_color"
-        android:contentDescription="@string/description"/>
+        android:contentDescription="@string/description" />
 
 </RelativeLayout>

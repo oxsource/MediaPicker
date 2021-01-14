@@ -1,12 +1,16 @@
 package pizzk.media.picker.widget
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.res.TypedArray
+import android.graphics.Rect
 import android.net.Uri
+import android.util.AttributeSet
+import android.view.View
+import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.util.AttributeSet
-import android.view.ViewGroup
 import pizzk.media.picker.R
 import pizzk.media.picker.adapter.CommonListAdapter
 import pizzk.media.picker.adapter.PhotoGroupAdapter
@@ -20,15 +24,20 @@ import pizzk.media.picker.view.PickChoseActivity
  * 选取一组照片的视图
  */
 class PhotoGroupView : RecyclerView {
+    private var spacing: Int = 0
 
-    constructor(context: Context) : super(context)
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
+    constructor(context: Context) : this(context, null)
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, androidx.recyclerview.R.attr.recyclerViewStyle)
 
-    init {
+    @SuppressLint("Recycle")
+    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle) {
         isVerticalScrollBarEnabled = false
         isHorizontalScrollBarEnabled = false
         overScrollMode = OVER_SCROLL_NEVER
+        val attrId = R.styleable.PhotoGroupView
+        val ta: TypedArray = context.obtainStyledAttributes(attrs, attrId) ?: return
+        spacing = ta.getDimensionPixelOffset(R.styleable.PhotoGroupView_space, spacing)
+        ta.recycle()
     }
 
     private val choiceList: List<String> = listOf(
@@ -41,38 +50,49 @@ class PhotoGroupView : RecyclerView {
               readOnly: Boolean,
               appendText: String = "",
               changed: (PhotoGroupAdapter, Int) -> Unit = { _, _ -> }) {
-        val manager = object : GridLayoutManager(context, special.column) {
-            override fun isAutoMeasureEnabled(): Boolean = true
-        }
-        this.layoutManager = manager
-        val pAdapter = PhotoGroupAdapter(context, special.fixed, special.lp)
-        pAdapter.setReadOnly(readOnly)
-        pAdapter.setChangeBlock(changed)
-        pAdapter.setAppendText(appendText)
-        if (!pAdapter.update(exists, special.limit, index = -1)) {
-            changed(pAdapter, -1)
-        }
-        this.adapter = pAdapter
-        //配置Adapter
-        pAdapter.setTapBlock { _, index ->
-            val el: PhotoItem = pAdapter.getList()[index]
-            if (el.path.isEmpty()) {
-                if (pAdapter.isReadOnly()) return@setTapBlock
-                //选择图片
-                val selects: List<String> = if (pAdapter.isAppend) pAdapter.selectPaths() else emptyList()
-                PickChoseActivity.show(special.activity, choiceList) { key ->
-                    showPickPhoto(special.activity, key, selects, special.limit, pAdapter, index, special.crop)
-                }
-            } else {
-                //预览
-                val selects: List<String> = if (pAdapter.isAppend) pAdapter.selectPaths() else arrayListOf(el.path)
-                showPreview(special.activity, selects, if (pAdapter.isAppend) index else 0)
+        post {
+            val vWidth = measuredWidth - paddingStart - paddingEnd
+            val minWidth = context.resources.getDimensionPixelOffset(R.dimen.pick_photo_min_size)
+            val lp: ViewGroup.LayoutParams = ViewGroup.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT)
+            do {
+                lp.width = (vWidth - (special.column - 1) * spacing) / special.column
+                if (lp.width >= minWidth || special.column <= 1) break
+                special.column -= 1
+            } while (true)
+            val manager = object : GridLayoutManager(context, special.column) {
+                override fun isAutoMeasureEnabled(): Boolean = true
             }
-        }
-        pAdapter.setTapChildBlock { _, _, index, what ->
-            if (CommonListAdapter.WHAT0 != what) return@setTapChildBlock
-            //移除图片
-            pAdapter.delete(index)
+            this.layoutManager = manager
+            addItemDecoration(GridSpacingItemDecoration(special.column, spacing))
+            val pAdapter = PhotoGroupAdapter(context, special.fixed, lp)
+            pAdapter.setReadOnly(readOnly)
+            pAdapter.setChangeBlock(changed)
+            pAdapter.setAppendText(appendText)
+            if (!pAdapter.update(exists, special.limit, index = -1)) {
+                changed(pAdapter, -1)
+            }
+            this.adapter = pAdapter
+            //配置Adapter
+            pAdapter.setTapBlock { _, index ->
+                val el: PhotoItem = pAdapter.getList()[index]
+                if (el.path.isEmpty()) {
+                    if (pAdapter.isReadOnly()) return@setTapBlock
+                    //选择图片
+                    val selects: List<String> = if (pAdapter.isAppend) pAdapter.selectPaths() else emptyList()
+                    PickChoseActivity.show(special.activity, choiceList) { key ->
+                        showPickPhoto(special.activity, key, selects, special.limit, pAdapter, index, special.crop)
+                    }
+                } else {
+                    //预览
+                    val selects: List<String> = if (pAdapter.isAppend) pAdapter.selectPaths() else arrayListOf(el.path)
+                    showPreview(special.activity, selects, if (pAdapter.isAppend) index else 0)
+                }
+            }
+            pAdapter.setTapChildBlock { _, _, index, what ->
+                if (CommonListAdapter.WHAT0 != what) return@setTapChildBlock
+                //移除图片
+                pAdapter.delete(index)
+            }
         }
     }
 
@@ -136,10 +156,21 @@ class PhotoGroupView : RecyclerView {
     //指定参数
     class Special(
             var activity: Activity,
-            var lp: ViewGroup.LayoutParams,
             var limit: Int = 1,
             var column: Int = 4,
             var fixed: MutableList<PhotoItem>? = null,
             var crop: CropParams? = null
     )
+
+    internal class GridSpacingItemDecoration(private val spanCount: Int, private val spacing: Int) : ItemDecoration() {
+
+        override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: State) {
+            val position = parent.getChildAdapterPosition(view)
+            val column = position % spanCount
+            outRect.left = column * spacing / spanCount
+            outRect.right = spacing - (column + 1) * spacing / spanCount
+            if (position < spanCount) return
+            outRect.top = spacing
+        }
+    }
 }

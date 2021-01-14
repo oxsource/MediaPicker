@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import pizzk.media.picker.arch.CropParams
@@ -24,10 +23,9 @@ class MainActivity : AppCompatActivity() {
         val photoGroup: PhotoGroupView = findViewById(R.id.photoGroup)
         val size: Int = resources.getDimensionPixelSize(R.dimen.x110)
         val tvHint: TextView = findViewById(R.id.tvHint)
-        val lp: ViewGroup.LayoutParams = ViewGroup.LayoutParams(size, ViewGroup.LayoutParams.WRAP_CONTENT)
-        val special: PhotoGroupView.Special = PhotoGroupView.Special(this@MainActivity, lp = lp, limit = 20, column = 4)
-        photoGroup.setup(special, emptyList(), readOnly = false, appendText = "添加文件") {
-            tvHint.text = "(${it.selectCount()}/${special.limit})"
+        val special: PhotoGroupView.Special = PhotoGroupView.Special(this@MainActivity, limit = 20, column = 4)
+        photoGroup.setup(special, emptyList(), readOnly = false, appendText = "添加文件") { adapter, _ ->
+            tvHint.text = "(${adapter.selectCount()}/${special.limit})"
         }
         //单张选择示例
         val ivSingle: ImageView = findViewById(R.id.ivSingle)
