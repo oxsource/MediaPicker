@@ -1,35 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/album_section_background"
-    android:orientation="vertical"
     android:foreground="?android:attr/selectableItemBackground"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/pick_media_activity_margin"
     android:paddingBottom="@dimen/pick_media_activity_margin"
-    android:paddingTop="@dimen/pick_media_activity_margin">
+    tools:ignore="UnusedAttribute">
 
     <ImageView
         android:id="@+id/image"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginLeft="@dimen/pick_media_activity_margin"
+        android:layout_marginStart="@dimen/pick_media_activity_margin"
         android:contentDescription="@string/description"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvName"
         style="@style/AlbumSectionName"
-        android:layout_marginLeft="@dimen/album_section_margin"
+        android:layout_marginStart="@dimen/album_section_margin"
         android:minWidth="@dimen/pick_media_activity_margin"
         android:text=""
         app:layout_constraintBottom_toTopOf="@+id/tvNum"
         app:layout_constraintLeft_toRightOf="@id/image"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvNum"
@@ -39,18 +40,18 @@
         android:text=""
         app:layout_constraintBottom_toBottomOf="@id/image"
         app:layout_constraintLeft_toLeftOf="@id/tvName"
-        app:layout_constraintTop_toTopOf="@id/tvName"/>
+        app:layout_constraintTop_toTopOf="@id/tvName" />
 
     <View
         android:id="@+id/vSelect"
         android:layout_width="@dimen/pick_radio_size"
         android:layout_height="@dimen/pick_radio_size"
         android:layout_gravity="center_vertical"
-        android:layout_marginRight="@dimen/album_section_margin"
+        android:layout_marginEnd="@dimen/album_section_margin"
         android:background="@drawable/pick_radio_checked"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

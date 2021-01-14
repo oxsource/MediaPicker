@@ -4,14 +4,14 @@
     android:layout_width="wrap_content"
     android:layout_height="@dimen/album_preview_bottom_gallery"
     android:background="#00000000"
-    android:paddingBottom="@dimen/album_preview_select_item_padding"
-    android:paddingTop="@dimen/album_preview_select_item_padding">
+    android:paddingTop="@dimen/album_preview_select_item_padding"
+    android:paddingBottom="@dimen/album_preview_select_item_padding">
 
     <ImageView
         android:id="@+id/iv"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginLeft="@dimen/album_preview_select_item_padding"
+        android:layout_marginStart="@dimen/album_preview_select_item_padding"
         android:contentDescription="@string/description"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
