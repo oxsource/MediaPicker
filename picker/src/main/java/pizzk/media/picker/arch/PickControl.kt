@@ -3,7 +3,7 @@ package pizzk.media.picker.arch
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import android.support.annotation.IntDef
+import androidx.annotation.IntDef
 import pizzk.media.picker.utils.ImageLoadImpl
 import pizzk.media.picker.view.PickActivity
 import java.io.File

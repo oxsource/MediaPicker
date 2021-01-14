@@ -1,6 +1,6 @@
 package pizzk.media.picker.listener
 
-import android.support.v4.view.ViewPager
+import androidx.viewpager.widget.ViewPager
 
 open class PagerListener : ViewPager.OnPageChangeListener {
     override fun onPageScrollStateChanged(state: Int) {

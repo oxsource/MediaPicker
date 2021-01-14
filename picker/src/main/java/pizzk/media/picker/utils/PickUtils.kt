@@ -12,9 +12,9 @@ import android.content.res.Resources
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.FileProvider
-import android.support.v7.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
+import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.widget.Toast

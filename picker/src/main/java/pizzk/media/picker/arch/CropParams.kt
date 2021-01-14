@@ -2,7 +2,7 @@ package pizzk.media.picker.arch
 
 import android.graphics.Bitmap
 import android.net.Uri
-import android.support.annotation.IntDef
+import androidx.annotation.IntDef
 
 /**
  * 裁剪参数
