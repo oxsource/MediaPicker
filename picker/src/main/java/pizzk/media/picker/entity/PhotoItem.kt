@@ -36,5 +36,4 @@ data class PhotoItem(
             return arrayOfNulls(size)
         }
     }
-
 }

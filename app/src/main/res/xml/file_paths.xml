@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <external-path
-        name="updater_download"
-        path="download/"/>
-
-    <!--<root-path-->
-    <!--name="camera_photos"-->
-    <!--path="" />-->
-
-    <external-path
-        name="camera_photos"
-        path="DCIM"/>
+        name="photos"
+        path="DCIM/" />
 </paths>

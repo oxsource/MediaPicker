@@ -52,16 +52,20 @@ class PreviewActivity : AppCompatActivity() {
     private lateinit var llSelect: LinearLayout
     private lateinit var checkBox: ImageView
     private lateinit var doneButton: PickActionMenu
+
     //动画
     private val hideOverlayAnim: AlphaAnimation = AlphaAnimation(1f, 0f)
     private val showOverlayAnim: AlphaAnimation = AlphaAnimation(0f, 1f)
+
     //适配器
     private lateinit var photoAdapter: PreviewPhotoAdapter
     private lateinit var selectAdapter: PreviewSelectAdapter
+
     //标志
     private var currentIndex: Int = 0
     private var selectLimit: Int = 0
     private var finishFlag: Boolean = false
+
     //可见性
     private var overlayFlag: Boolean = true
 
@@ -74,9 +78,9 @@ class PreviewActivity : AppCompatActivity() {
 
     //设置适配器
     private fun setupAdapter() {
-        val photos: List<String> = intent.getStringArrayListExtra(PreviewActivity.KEY_DATA)
+        val photos: List<String> = intent.getStringArrayListExtra(KEY_DATA)
         //预览相关
-        currentIndex = intent.getIntExtra(PreviewActivity.KEY_INDEX, currentIndex)
+        currentIndex = intent.getIntExtra(KEY_INDEX, currentIndex)
         photoAdapter = PreviewPhotoAdapter(baseContext, photos)
         photoAdapter.setClickListener { switchOverlayVisibility() }
         photoAdapter.setScaleBlock {
@@ -85,8 +89,8 @@ class PreviewActivity : AppCompatActivity() {
             }
         }
         //选择相关
-        selectLimit = intent.getIntExtra(PreviewActivity.KEY_SELECT_LIMIT, selectLimit)
-        val selects: List<String> = intent.getStringArrayListExtra(PreviewActivity.KEY_SELECT_DATA)
+        selectLimit = intent.getIntExtra(KEY_SELECT_LIMIT, selectLimit)
+        val selects: List<String> = intent.getStringArrayListExtra(KEY_SELECT_DATA)
         selectAdapter = PreviewSelectAdapter(baseContext, selects)
         selectAdapter.setClickListener { path ->
             val targetPath: String? = photoAdapter.getList().findLast { it == path }

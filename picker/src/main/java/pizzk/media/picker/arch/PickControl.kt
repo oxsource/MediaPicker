@@ -13,6 +13,7 @@ import java.io.File
  */
 class PickControl private constructor() {
     companion object {
+        const val TAG = "PickControl"
         const val ACTION_NONE: Int = -1
         const val ACTION_PREVIEW: Int = 0
         const val ACTION_ALBUM: Int = 1
@@ -47,6 +48,7 @@ class PickControl private constructor() {
     private var filter: (Uri?, String) -> Boolean = dFilter
     private var limit: Int = 1
     private var callback: (action: Int, List<Uri>) -> Unit = dCallback
+
     //裁剪
     private var crop: CropParams? = null
     private var cropFile: File? = null
@@ -54,6 +56,7 @@ class PickControl private constructor() {
     //选中数据
     private var selects: List<String> = emptyList()
     private var index: Int = 0
+
     //拍照
     private var cameraFile: File? = null
 

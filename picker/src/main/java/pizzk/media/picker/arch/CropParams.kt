@@ -27,9 +27,9 @@ class CropParams(var uri: Uri? = null,
     //获取格式
     fun getFormatPlain(): String {
         return when (format) {
-            CropParams.FORMAT_JPEG -> Bitmap.CompressFormat.JPEG.toString()
-            CropParams.FORMAT_PNG -> Bitmap.CompressFormat.PNG.toString()
-            CropParams.FORMAT_WEBP -> Bitmap.CompressFormat.WEBP.toString()
+            FORMAT_JPEG -> Bitmap.CompressFormat.JPEG.toString()
+            FORMAT_PNG -> Bitmap.CompressFormat.PNG.toString()
+            FORMAT_WEBP -> Bitmap.CompressFormat.WEBP.toString()
             else -> Bitmap.CompressFormat.JPEG.toString()
         }
     }
@@ -37,9 +37,9 @@ class CropParams(var uri: Uri? = null,
     //获取后缀
     fun getFormatExt(): String {
         return when (format) {
-            CropParams.FORMAT_JPEG -> MimeType.JPEG.extensions[0]
-            CropParams.FORMAT_PNG -> MimeType.PNG.extensions[0]
-            CropParams.FORMAT_WEBP -> MimeType.WEBP.extensions[0]
+            FORMAT_JPEG -> MimeType.JPEG.extensions[0]
+            FORMAT_PNG -> MimeType.PNG.extensions[0]
+            FORMAT_WEBP -> MimeType.WEBP.extensions[0]
             else -> MimeType.JPEG.extensions[0]
         }
     }

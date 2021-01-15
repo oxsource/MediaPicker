@@ -1,6 +1,7 @@
 package pizzk.media.picker.utils
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.ContentValues
@@ -98,7 +99,7 @@ object PickUtils {
      * 启动相册
      */
     fun launchAlbum(activity: AppCompatActivity) {
-        val access: Boolean = checkPermission(activity, externalPermission, PickUtils.REQUEST_CODE_ALBUM)
+        val access: Boolean = checkPermission(activity, externalPermission, REQUEST_CODE_ALBUM)
         if (!access) return
         val picker: PickControl = PickControl.obtain(false)
         val uris: List<Uri> = picker.selects().mapNotNull(PickUtils::path2Uri)
@@ -113,7 +114,7 @@ object PickUtils {
      */
     fun launchCamera(activity: AppCompatActivity): Uri? {
         //权限确认
-        val access: Boolean = PickUtils.checkPermission(activity, cameraPermission, PickUtils.REQUEST_CODE_CAMERA)
+        val access: Boolean = checkPermission(activity, cameraPermission, REQUEST_CODE_CAMERA)
         if (!access) return null
         //创建文件
         val optionalFile: File? = FileUtils.createPhoto(activity.application, MimeType.JPEG.extensions[0])
@@ -129,7 +130,7 @@ object PickUtils {
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         val uri: Uri = FileProvider.getUriForFile(activity, PickControl.authority(), file)
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
-        activity.startActivityForResult(intent, PickUtils.REQUEST_CODE_CAMERA)
+        activity.startActivityForResult(intent, REQUEST_CODE_CAMERA)
         PickControl.obtain(false).cameraFile(file)
         return uri
     }
@@ -164,7 +165,7 @@ object PickUtils {
         }
         val srcUri: Uri = uri ?: return null
         //检查裁切图像存储权限
-        val access: Boolean = checkPermission(activity, externalPermission, PickUtils.REQUEST_CODE_CROP)
+        val access: Boolean = checkPermission(activity, externalPermission, REQUEST_CODE_CROP)
         if (!access) return null
         //创建文件
         val optionalFile: File? = FileUtils.createPhoto(activity.application, params.getFormatExt(), "crop")
@@ -200,7 +201,7 @@ object PickUtils {
             val packageName: String = info.activityInfo.packageName
             activity.grantUriPermission(packageName, destUri, grantFlag)
         }
-        activity.startActivityForResult(intent, PickUtils.REQUEST_CODE_CROP)
+        activity.startActivityForResult(intent, REQUEST_CODE_CROP)
         PickControl.obtain(false).cropFile(file)
         return destUri
     }
@@ -219,8 +220,10 @@ object PickUtils {
                 MediaStore.Images.Media.BUCKET_DISPLAY_NAME
         )
         val sortOrder = "${MediaStore.Images.Media.DATE_TAKEN} DESC"
-        val cursor: Cursor = resolver.query(uri, projection, null, null, sortOrder)
+        var cursor: Cursor? = null
         try {
+            cursor = resolver.query(uri, projection, null, null, sortOrder)
+            cursor ?: return emptyList()
             val items: MutableList<AlbumItem> = ArrayList(cursor.count)
             for (i: Int in 0 until cursor.count) {
                 if (!cursor.moveToPosition(i)) break
@@ -240,9 +243,7 @@ object PickUtils {
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
-            if (!cursor.isClosed) {
-                cursor.close()
-            }
+            cursor?.close()
         }
         return sections
     }
@@ -255,7 +256,8 @@ object PickUtils {
             val mime: String = getImageMime(context, file.absolutePath)
             values.put(MediaStore.Images.Media.DATA, file.absolutePath)
             values.put(MediaStore.Images.Media.MIME_TYPE, mime)
-            val uri: Uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            val uri: Uri? = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            uri ?: return fileUri
             context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, fileUri))
             uri
         } catch (e: Exception) {
@@ -301,6 +303,7 @@ object PickUtils {
         }
     }
 
+    @SuppressLint("Recycle")
     fun filePath(context: Context?, path: String): String {
         context ?: return ""
         val prefix: Array<String> = arrayOf("content://", "file://")
@@ -316,7 +319,7 @@ object PickUtils {
             val uri: Uri = Uri.parse(path)
             val projection: Array<String> = arrayOf(MediaStore.MediaColumns.DATA)
             val resolver: ContentResolver = context.applicationContext.contentResolver
-            cursor = resolver.query(uri, projection, null, null, null)
+            cursor = resolver.query(uri, projection, null, null, null) ?: return ""
             if (cursor.moveToFirst()) cursor.getString(0) else ""
         } catch (e: Exception) {
             e.printStackTrace()

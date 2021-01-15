@@ -6,7 +6,7 @@ import android.view.MenuItem
 /**
  * 标题菜单按钮
  */
-class PickActionMenu(val toolbar: Toolbar, block: () -> Unit) {
+class PickActionMenu(toolbar: Toolbar, block: () -> Unit) {
 
     private val menu: MenuItem = toolbar.menu.add("")
 
