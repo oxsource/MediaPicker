@@ -13,7 +13,7 @@ import pizzk.media.picker.view.PickChoseActivity
 object PickPhotoHelper {
 
     fun show(activity: Activity, limit: Int = 1, cropParams: CropParams? = null,
-             callback: (action: Int, uris: List<Uri>) -> Unit) {
+             callback: PickControl.PickCallback) {
         val choiceList: List<String> = listOf(
                 activity.getString(R.string.pick_chose_camera),
                 activity.getString(R.string.pick_chose_album)

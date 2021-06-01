@@ -40,7 +40,11 @@ class PickActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (!PickUtils.onRequestPermissionResult(this@PickActivity, permissions, grantResults)) {
             finish()
@@ -61,16 +65,18 @@ class PickActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        val picker: PickControl = PickControl.obtain(false)
         if (Activity.RESULT_CANCELED == resultCode) {
             Log.d(TAG, getString(R.string.pick_media_user_cancel))
+            picker.callback().onFailure(true, "")
             finish()
             return
         }
         if (Activity.RESULT_OK != resultCode) {
+            picker.callback().onFailure(false, "result is not ok")
             finish()
             return
         }
-        val picker: PickControl = PickControl.obtain(false)
         when (requestCode) {
             PickUtils.REQUEST_CODE_CAMERA -> {
                 val file: File? = PickControl.obtain(false).cameraFile()
@@ -81,7 +87,7 @@ class PickActivity : AppCompatActivity() {
                         PickUtils.launchCrop(this@PickActivity)
                         return
                     } else {
-                        picker.callbacks().invoke(picker.action(), listOf(uri))
+                        picker.callback().onSuccess(picker.action(), listOf(uri))
                     }
                 }
                 finish()
@@ -93,18 +99,21 @@ class PickActivity : AppCompatActivity() {
                     PickUtils.launchCrop(this@PickActivity)
                     return
                 } else {
-                    picker.callbacks().invoke(picker.action(), uris)
+                    picker.callback().onSuccess(picker.action(), uris)
                 }
                 finish()
             }
             PickUtils.REQUEST_CODE_PREVIEW -> {
+                picker.callback().onSuccess(picker.action(), emptyList())
                 finish()
             }
             PickUtils.REQUEST_CODE_CROP -> {
                 val file: File? = PickControl.obtain(false).cropFile()
                 if (null != file) {
                     val uri: Uri = PickUtils.saveToAlbum(baseContext, file)
-                    PickControl.obtain(false).callbacks().invoke(picker.action(), listOf(uri))
+                    PickControl.obtain(false).callback().onSuccess(picker.action(), listOf(uri))
+                } else {
+                    picker.callback().onFailure(false, "request crop failed.")
                 }
                 finish()
             }

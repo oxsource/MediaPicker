@@ -29,7 +29,7 @@ class PickControl private constructor() {
 
         //默认函数块
         private val dFilter: (Uri?, String) -> Boolean = { _, _ -> true }
-        private val dCallback: (action: Int, List<Uri>) -> Unit = { _, _ -> Unit }
+        private val dCallback: PickCallback = PickCallback()
 
         private val picker: PickControl = PickControl()
 
@@ -47,7 +47,7 @@ class PickControl private constructor() {
     private var action: Int = ACTION_NONE
     private var filter: (Uri?, String) -> Boolean = dFilter
     private var limit: Int = 1
-    private var callback: (action: Int, List<Uri>) -> Unit = dCallback
+    private var callback: PickCallback = dCallback
 
     //裁剪
     private var crop: CropParams? = null
@@ -74,6 +74,12 @@ class PickControl private constructor() {
         cropFile = null
         cameraFile = null
         return this
+    }
+
+    open class PickCallback {
+        open fun onSuccess(action: Int, uris: List<Uri>) = Unit
+
+        open fun onFailure(cancel: Boolean, msg: String) = Unit
     }
 
     /**
@@ -127,8 +133,8 @@ class PickControl private constructor() {
     /**
      * 设置拾取回调
      */
-    fun callback(block: (action: Int, uris: List<Uri>) -> Unit): PickControl {
-        this.callback = block
+    fun callback(callback: PickCallback): PickControl {
+        this.callback = callback
         return this
     }
 
@@ -161,7 +167,7 @@ class PickControl private constructor() {
     /**
      * 获取回调函数
      */
-    internal fun callbacks(): (action: Int, uris: List<Uri>) -> Unit = callback
+    internal fun callback(): PickCallback = callback
 
     /**
      * 获预选择图片路径
