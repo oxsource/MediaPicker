@@ -4,31 +4,33 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.core.content.ContextCompat
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.*
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.AccelerateInterpolator
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.*
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import pizzk.media.picker.R
+import pizzk.media.picker.adapter.AlbumBucketAdapter
 import pizzk.media.picker.adapter.AlbumPhotoAdapter
-import pizzk.media.picker.adapter.AlbumSectionAdapter
-import pizzk.media.picker.entity.AlbumItem
-import pizzk.media.picker.entity.AlbumSection
+import pizzk.media.picker.entity.AlbumBucket
+import pizzk.media.picker.source.IMedia
 import pizzk.media.picker.utils.PickUtils
 
 /**
  * 相册Activity
  */
+@SuppressLint("NotifyDataSetChanged")
 class AlbumActivity : AppCompatActivity() {
     companion object {
         private const val KEY_SELECT_DATA: String = "key_select_data"
@@ -53,12 +55,15 @@ class AlbumActivity : AppCompatActivity() {
     private lateinit var sectionMask: View
     private lateinit var sectionsView: RecyclerView
     private lateinit var doneButton: PickActionMenu
+
     //适配器
     private lateinit var photoAdapter: AlbumPhotoAdapter
-    private lateinit var sectionAdapter: AlbumSectionAdapter
+    private lateinit var bucketAdapter: AlbumBucketAdapter
+
     //标志位
     private var useOriginPhoto: Boolean = false
     private var finishFlag: Boolean = false
+
     //动画
     private var animHideSection: AnimatorSet? = null
     private var animShowSection: AnimatorSet? = null
@@ -68,43 +73,53 @@ class AlbumActivity : AppCompatActivity() {
         setContentView(R.layout.activity_album)
         setupAdapter()
         initViews()
+        PickUtils.loadMediaSource(this) { source, buckets ->
+            val selectUris: List<Uri> = intent.getParcelableArrayListExtra(KEY_SELECT_DATA)
+            photoAdapter.source(source)
+            val selects = photoAdapter.getMedias(selectUris)
+            photoAdapter.updateSelectList(selects)
+            onSelectChanged(photoAdapter.getSelectList())
+            bucketAdapter.append(buckets, clean = true)
+            bucketAdapter.notifyDataSetChanged()
+        }
     }
 
     //初始化适配器
     private fun setupAdapter() {
-        val selectUris: List<Uri> = intent.getParcelableArrayListExtra(KEY_SELECT_DATA)
         //图片适配器
         photoAdapter = AlbumPhotoAdapter(baseContext)
         photoAdapter.setSelectLimit(intent.getIntExtra(KEY_SELECT_LIMIT, 0))
         photoAdapter.setTapBlock { _, index ->
-            val uris: List<String> = photoAdapter.getList().mapNotNull(AlbumItem::getUri).map(Uri::toString)
-            val selects: List<String> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri).map(Uri::toString)
-            PreviewActivity.show(this@AlbumActivity, uris, selects, index, photoAdapter.getSelectLimit())
+            val uris: List<String> =
+                photoAdapter.getList().mapNotNull(IMedia::uri).map(Uri::toString)
+            val selects: List<String> =
+                photoAdapter.getSelectList().mapNotNull(IMedia::uri).map(Uri::toString)
+            PreviewActivity.show(
+                this@AlbumActivity,
+                uris,
+                selects,
+                index,
+                photoAdapter.getSelectLimit()
+            )
         }
         //目录适配器
-        sectionAdapter = AlbumSectionAdapter(baseContext)
-        sectionAdapter.setTapBlock { _, index ->
+        bucketAdapter = AlbumBucketAdapter(baseContext)
+        bucketAdapter.setTapBlock { _, index ->
             showSectionView(false)
-            val section: AlbumSection = sectionAdapter.getList()[index]
-            val selectSection: AlbumSection? = sectionAdapter.getSelectSection()
+            val section: AlbumBucket = bucketAdapter.getList()[index]
+            val selectSection: AlbumBucket? = bucketAdapter.getSelectBucket()
             if (section == selectSection) return@setTapBlock
-            sectionAdapter.notifyDataSetChanged()
+            bucketAdapter.notifyItemChanged(index)
+            val oldIndex = bucketAdapter.getList().indexOf(selectSection)
+            if (oldIndex >= 0) bucketAdapter.notifyItemChanged(oldIndex)
             selectSection?.select = false
             section.select = true
             val name: String = section.name
             tvSection.text = name
-            //更新数据
-            photoAdapter.append(sectionAdapter.getAlbumsBySectionIndex(index), true)
+            //更新相册
+            photoAdapter.bucket(section.id)
             photoAdapter.notifyDataSetChanged()
         }
-        //初始化数据
-        val allItems: List<AlbumItem> = sectionAdapter.getAlbumsBySectionIndex(0)
-        photoAdapter.append(allItems, true)
-        val selects: List<AlbumItem> = selectUris.map {
-            val uri: Uri = it
-            return@map allItems.findLast { it.getUri() == uri }
-        }.filterNotNull()
-        photoAdapter.updateSelectList(selects)
     }
 
 
@@ -123,7 +138,8 @@ class AlbumActivity : AppCompatActivity() {
         //图像列表
         photosView = findViewById(R.id.photoRecycleView)
         (photosView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-        val layoutManager = GridLayoutManager(baseContext, resources.getInteger(R.integer.album_span_count))
+        val layoutManager =
+            GridLayoutManager(baseContext, resources.getInteger(R.integer.album_span_count))
         photosView.layoutManager = layoutManager
         photosView.adapter = photoAdapter
         //底部操作栏
@@ -141,10 +157,9 @@ class AlbumActivity : AppCompatActivity() {
         sectionMask.setOnClickListener(::onWidgetClick)
         sectionsView = findViewById(R.id.sectionRecycleView)
         sectionsView.layoutManager = LinearLayoutManager(baseContext)
-        sectionsView.adapter = sectionAdapter
+        sectionsView.adapter = bucketAdapter
         //选中状态调整
         photoAdapter.setSelectBlock(::onSelectChanged)
-        onSelectChanged(photoAdapter.getSelectList())
     }
 
     //控件点击事件
@@ -158,10 +173,19 @@ class AlbumActivity : AppCompatActivity() {
                 changeOriginState()
             }
             tvPreview -> {
-                val uris: List<String> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri).map(Uri::toString)
+                val uris: List<String> =
+                    photoAdapter.getSelectList().mapNotNull(IMedia::uri).map(Uri::toString)
                 if (uris.isNotEmpty()) {
-                    val selects: List<String> = photoAdapter.getSelectList().mapNotNull(AlbumItem::getUri).map(Uri::toString)
-                    PreviewActivity.show(this@AlbumActivity, uris, selects, 0, photoAdapter.getSelectLimit())
+                    val selects: List<String> =
+                        photoAdapter.getSelectList().mapNotNull(IMedia::uri)
+                            .map(Uri::toString)
+                    PreviewActivity.show(
+                        this@AlbumActivity,
+                        uris,
+                        selects,
+                        0,
+                        photoAdapter.getSelectLimit()
+                    )
                 }
             }
             sectionMask -> {
@@ -176,7 +200,8 @@ class AlbumActivity : AppCompatActivity() {
             val tansY = "translationY"
             val bottomHeight: Float = rlBottom.top.toFloat()
             val alpha = "alpha"
-            val translationShow: ObjectAnimator = ObjectAnimator.ofFloat(sectionsView, tansY, bottomHeight, 0f)
+            val translationShow: ObjectAnimator =
+                ObjectAnimator.ofFloat(sectionsView, tansY, bottomHeight, 0f)
             val alphaShow: ObjectAnimator = ObjectAnimator.ofFloat(sectionMask, alpha, 0.0f, 1.0f)
             translationShow.duration = 300
             val animShow = AnimatorSet()
@@ -184,7 +209,8 @@ class AlbumActivity : AppCompatActivity() {
             animShow.play(translationShow).with(alphaShow)
             animShowSection = animShow
             //隐藏动画
-            val translationHide: ObjectAnimator = ObjectAnimator.ofFloat(sectionsView, tansY, 0f, bottomHeight)
+            val translationHide: ObjectAnimator =
+                ObjectAnimator.ofFloat(sectionsView, tansY, 0f, bottomHeight)
             val alphaHide: ObjectAnimator = ObjectAnimator.ofFloat(sectionMask, alpha, 1.0f, 0.0f)
             translationHide.duration = 240
             val animHide = AnimatorSet()
@@ -210,16 +236,19 @@ class AlbumActivity : AppCompatActivity() {
         }
     }
 
-
     //选择发生变化回调
-    private fun onSelectChanged(list: List<AlbumItem>) {
+    private fun onSelectChanged(list: List<IMedia>) {
         if (list.isEmpty()) {
             tvPreview.setText(R.string.pick_media_preview)
             doneButton.item().setTitle(R.string.pick_media_finish)
             doneButton.enable(false)
         } else {
             tvPreview.text = String.format(getString(R.string.pick_media_preview_format), list.size)
-            doneButton.item().title = String.format(getString(R.string.pick_media_finish_format), list.size, photoAdapter.getSelectLimit())
+            doneButton.item().title = String.format(
+                getString(R.string.pick_media_finish_format),
+                list.size,
+                photoAdapter.getSelectLimit()
+            )
             doneButton.enable(true)
         }
     }
@@ -231,7 +260,7 @@ class AlbumActivity : AppCompatActivity() {
     }
 
     override fun finish() {
-        val uri: List<Uri> = photoAdapter.getSelectList().mapNotNull { it.getUri() }
+        val uri: List<Uri> = photoAdapter.getSelectList().mapNotNull { it.uri() }
         PickUtils.setResult(this@AlbumActivity, uri, finishFlag, true)
         super.finish()
         overridePendingTransition(0, 0)
@@ -244,14 +273,19 @@ class AlbumActivity : AppCompatActivity() {
             PickUtils.REQUEST_CODE_PREVIEW -> {
                 val selectUris: List<Uri> = PickUtils.obtainResultUris(data)
                 finishFlag = PickUtils.isResultFinish(data)
-                val all: List<AlbumItem> = sectionAdapter.getAlbumsBySectionIndex(0)
-                val selectItems: List<AlbumItem> = all.filter { selectUris.contains(it.getUri()) }
-                photoAdapter.updateSelectList(selectItems)
+                photoAdapter.bucket(null)
+                val selects = photoAdapter.getMedias(selectUris)
+                photoAdapter.updateSelectList(selects)
                 if (finishFlag) {
                     finish()
                     return
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        photoAdapter.source(null)
+        super.onDestroy()
     }
 }

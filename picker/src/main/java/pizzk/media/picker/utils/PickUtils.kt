@@ -23,12 +23,13 @@ import pizzk.media.picker.R
 import pizzk.media.picker.arch.CropParams
 import pizzk.media.picker.arch.MimeType
 import pizzk.media.picker.arch.PickControl
-import pizzk.media.picker.entity.AlbumItem
-import pizzk.media.picker.entity.AlbumSection
+import pizzk.media.picker.entity.AlbumBucket
+import pizzk.media.picker.source.AlbumMediaSource
 import pizzk.media.picker.view.AlbumActivity
 import pizzk.media.picker.view.PreviewActivity
 import java.io.File
-
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * 系统工具类
@@ -45,13 +46,13 @@ object PickUtils {
     private const val KEY_NAVIGATION_FLAG: String = "key_navigation_flag"
 
     private val cameraPermission: Array<String> = arrayOf(
-            Manifest.permission.CAMERA,
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        Manifest.permission.CAMERA,
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
     private val externalPermission: Array<String> = arrayOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
 
     /**
@@ -61,7 +62,8 @@ object PickUtils {
         val notGrant: MutableList<String> = ArrayList()
         for (i: Int in 0 until ps.size) {
             val p: String = ps[i]
-            val auth: Boolean = ActivityCompat.checkSelfPermission(activity, p) == PackageManager.PERMISSION_GRANTED
+            val auth: Boolean =
+                ActivityCompat.checkSelfPermission(activity, p) == PackageManager.PERMISSION_GRANTED
             if (auth) continue
             notGrant.add(p)
         }
@@ -73,11 +75,16 @@ object PickUtils {
     /**
      * 检查权限回调
      */
-    fun onRequestPermissionResult(activity: Activity, ps: Array<out String>, grants: IntArray): Boolean {
-        for (i: Int in 0 until ps.size) {
+    fun onRequestPermissionResult(
+        activity: Activity,
+        ps: Array<out String>,
+        grants: IntArray
+    ): Boolean {
+        for (i: Int in ps.indices) {
             if (PackageManager.PERMISSION_GRANTED == grants[i]) continue
             val permission: String = ps[i]
-            val rationale: Boolean = ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)
+            val rationale: Boolean =
+                ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)
             val refuseHint: String = activity.getString(R.string.permission_refuse)
             val message: String = when (permission) {
                 Manifest.permission.CAMERA -> {
@@ -117,9 +124,14 @@ object PickUtils {
         val access: Boolean = checkPermission(activity, cameraPermission, REQUEST_CODE_CAMERA)
         if (!access) return null
         //创建文件
-        val optionalFile: File? = FileUtils.createPhoto(activity.application, MimeType.JPEG.extensions[0])
+        val optionalFile: File? =
+            FileUtils.createPhoto(activity.application, MimeType.JPEG.extensions[0])
         if (null == optionalFile) {
-            Toast.makeText(activity, activity.getString(R.string.pick_media_fail_to_create_file), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.pick_media_fail_to_create_file),
+                Toast.LENGTH_SHORT
+            ).show()
             activity.finish()
         }
         //启动相机
@@ -168,9 +180,14 @@ object PickUtils {
         val access: Boolean = checkPermission(activity, externalPermission, REQUEST_CODE_CROP)
         if (!access) return null
         //创建文件
-        val optionalFile: File? = FileUtils.createPhoto(activity.application, params.getFormatExt(), "crop")
+        val optionalFile: File? =
+            FileUtils.createPhoto(activity.application, params.getFormatExt(), "crop")
         if (null == optionalFile) {
-            Toast.makeText(activity, activity.getString(R.string.pick_media_fail_to_create_file), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.pick_media_fail_to_create_file),
+                Toast.LENGTH_SHORT
+            ).show()
             activity.finish()
         }
         val file: File = optionalFile ?: return null
@@ -195,8 +212,10 @@ object PickUtils {
         intent.putExtra(MediaStore.EXTRA_OUTPUT, destUri)
         intent.putExtra("outputFormat", params.getFormatPlain())
         //相关应用授权
-        val resolves: List<ResolveInfo> = activity.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
-        val grantFlag: Int = Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        val resolves: List<ResolveInfo> =
+            activity.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        val grantFlag: Int =
+            Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
         for (info: ResolveInfo in resolves) {
             val packageName: String = info.activityInfo.packageName
             activity.grantUriPermission(packageName, destUri, grantFlag)
@@ -206,46 +225,27 @@ object PickUtils {
         return destUri
     }
 
-    /**
-     * 加载图片资源图标
-     */
-    fun loadImages(context: Context): List<AlbumSection> {
-        val sections: MutableList<AlbumSection> = ArrayList(1)
-        sections.add(AlbumSection("", emptyList(), true))
-        val resolver: ContentResolver = context.contentResolver
-        val uri: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        val projection: Array<String> = arrayOf(
-                MediaStore.Files.FileColumns._ID,
-                MediaStore.MediaColumns.MIME_TYPE,
-                MediaStore.Images.Media.BUCKET_DISPLAY_NAME
-        )
-        val sortOrder = "${MediaStore.Images.Media.DATE_TAKEN} DESC"
-        var cursor: Cursor? = null
-        try {
-            cursor = resolver.query(uri, projection, null, null, sortOrder)
-            cursor ?: return emptyList()
-            val items: MutableList<AlbumItem> = ArrayList(cursor.count)
-            for (i: Int in 0 until cursor.count) {
-                if (!cursor.moveToPosition(i)) break
-                val item: AlbumItem = AlbumItem.obtain(cursor)
-                val access: Boolean = PickControl.obtain(false).filter().invoke(item.getUri(), item.getMime())
-                if (!access) {
-                    continue
-                }
-                items.add(item)
+    private val tLoadPool: ExecutorService = Executors.newScheduledThreadPool(1)
+
+    fun loadMediaSource(
+        activity: AppCompatActivity,
+        callback: (AlbumMediaSource, List<AlbumBucket>) -> Unit
+    ) {
+        tLoadPool.execute {
+            val source = AlbumMediaSource(activity)
+            val buckets = source.bucketIds()
+            val sections: MutableList<AlbumBucket> = ArrayList(buckets.size + 1)
+            val name = activity.getString(R.string.pick_media_all_picture)
+            source.use(id = null)
+            sections.add(AlbumBucket.of(id = "", name = name, source = source))
+            buckets.forEach { e ->
+                source.use(e.key)
+                sections.add(AlbumBucket.of(id = e.key, name = e.value, source = source))
             }
-            val others: List<AlbumSection> = items.groupBy {
-                it.getBucket()
-            }.map {
-                AlbumSection(it.key, it.value, false)
-            }
-            sections.addAll(others)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            cursor?.close()
+            source.use(id = null)
+            sections[0].select = true
+            activity.runOnUiThread { callback(source, sections) }
         }
-        return sections
     }
 
     //将图像保存至系统相册
@@ -256,7 +256,8 @@ object PickUtils {
             val mime: String = getImageMime(context, file.absolutePath)
             values.put(MediaStore.Images.Media.DATA, file.absolutePath)
             values.put(MediaStore.Images.Media.MIME_TYPE, mime)
-            val uri: Uri? = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            val uri: Uri? =
+                context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
             uri ?: return fileUri
             context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, fileUri))
             uri
@@ -333,7 +334,8 @@ object PickUtils {
     fun hideSystemStatusBar(activity: Activity?): Boolean {
         activity ?: return false
         val decorView: View = activity.window.decorView
-        val flag: Boolean = 0 == (decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+        val flag: Boolean =
+            0 == (decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
         activity.intent.putExtra(KEY_NAVIGATION_FLAG, flag)
         decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -351,7 +353,8 @@ object PickUtils {
         decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
         if (!activity.intent.getBooleanExtra(KEY_NAVIGATION_FLAG, false)) {
-            decorView.systemUiVisibility = decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            decorView.systemUiVisibility =
+                decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         }
         return true
     }

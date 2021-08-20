@@ -28,7 +28,7 @@ class PickControl private constructor() {
         private var imageLoad: ImageLoad = ImageLoadImpl
 
         //默认函数块
-        private val dFilter: (Uri?, String) -> Boolean = { _, _ -> true }
+        private val disableFilter: (Uri?, String) -> Boolean = { _, _ -> true }
         private val dCallback: PickCallback = PickCallback()
 
         private val picker: PickControl = PickControl()
@@ -45,7 +45,7 @@ class PickControl private constructor() {
     }
 
     private var action: Int = ACTION_NONE
-    private var filter: (Uri?, String) -> Boolean = dFilter
+    private var filter: (Uri?, String) -> Boolean = disableFilter
     private var limit: Int = 1
     private var callback: PickCallback = dCallback
 
@@ -65,7 +65,7 @@ class PickControl private constructor() {
      */
     fun clean(): PickControl {
         action = ACTION_NONE
-        filter = dFilter
+        filter = disableFilter
         crop = null
         limit = 1
         callback = dCallback
@@ -101,7 +101,7 @@ class PickControl private constructor() {
     /**
      * 通过URI和MIME过滤
      */
-    fun filter(block: (uri: Uri?, mime: String) -> Boolean): PickControl {
+    fun disableFilter(block: (uri: Uri?, mime: String) -> Boolean): PickControl {
         this.filter = block
         return this
     }
@@ -152,7 +152,7 @@ class PickControl private constructor() {
     /**
      * 获取过滤器
      */
-    internal fun filter(): (Uri?, String) -> Boolean = filter
+    internal fun disableFilter(): (Uri?, String) -> Boolean = filter
 
     /**
      * 获取裁切参数

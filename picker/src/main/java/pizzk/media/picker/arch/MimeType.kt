@@ -52,12 +52,11 @@ enum class MimeType(val mime: String, val extensions: Array<String>) {
             if (mime in ofVideo().map { it.mime }) {
                 return MediaStore.Video.Media.EXTERNAL_CONTENT_URI
             }
-            val name = "external"
-            return MediaStore.Files.getContentUri(name)
+            return MediaStore.Files.getContentUri("external")
         }
 
         fun getMimeByPath(path: String): MimeType? {
-            return MimeType.values().findLast { mime ->
+            return values().findLast { mime ->
                 null != mime.extensions.findLast { ext ->
                     path.endsWith(ext)
                 }

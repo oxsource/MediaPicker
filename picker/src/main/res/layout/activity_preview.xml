@@ -82,6 +82,8 @@
             android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
             android:orientation="horizontal"
+            android:paddingStart="@dimen/pick_media_activity_margin"
+            android:paddingEnd="@dimen/pick_media_activity_margin"
             tools:ignore="UseCompoundDrawables">
 
             <ImageView

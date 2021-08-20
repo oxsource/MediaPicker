@@ -1,5 +1,6 @@
 package pizzk.media.picker.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.text.TextUtils
 import android.view.View
@@ -30,6 +31,7 @@ class PhotoGroupAdapter(context: Context, fixedList: List<PhotoItem>?, lp: ViewG
         this.lp = lp
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setReadOnly(value: Boolean) {
         if (value == readOnly) return
         readOnly = value
