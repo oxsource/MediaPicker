@@ -1,14 +1,10 @@
 package pizzk.media.picker.view
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.viewpager.widget.ViewPager
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.appcompat.widget.Toolbar
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
@@ -17,14 +13,22 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.ViewPager
 import pizzk.media.picker.R
 import pizzk.media.picker.adapter.PreviewPhotoAdapter
 import pizzk.media.picker.adapter.PreviewSelectAdapter
+import pizzk.media.picker.arch.PickLiveSource
 import pizzk.media.picker.listener.PagerListener
 import pizzk.media.picker.listener.SimpleAnimationListener
+import pizzk.media.picker.source.IMediaSource
+import pizzk.media.picker.source.PathMediaSource
 import pizzk.media.picker.utils.PickUtils
 
-
+@SuppressLint("NotifyDataSetChanged")
 class PreviewActivity : AppCompatActivity() {
     companion object {
         private const val KEY_DATA: String = "key_data"
@@ -32,7 +36,13 @@ class PreviewActivity : AppCompatActivity() {
         private const val KEY_SELECT_LIMIT: String = "key_select_limit"
         private const val KEY_SELECT_DATA: String = "key_select_data"
 
-        internal fun show(activity: Activity?, all: List<String>, selects: List<String>, index: Int, selectLimit: Int = 0) {
+        internal fun show(
+            activity: Activity?,
+            all: List<String>,
+            selects: List<String>,
+            index: Int,
+            selectLimit: Int = 0
+        ) {
             val context: Activity = activity ?: return
             val intent = Intent(context, PreviewActivity::class.java)
             intent.putStringArrayListExtra(KEY_DATA, ArrayList(all))
@@ -79,9 +89,11 @@ class PreviewActivity : AppCompatActivity() {
     //设置适配器
     private fun setupAdapter() {
         val photos: List<String> = intent.getStringArrayListExtra(KEY_DATA)
+        val temp: IMediaSource? = if (photos.isEmpty()) PickLiveSource.source() else null
+        val source = temp ?: PathMediaSource(baseContext, photos)
         //预览相关
         currentIndex = intent.getIntExtra(KEY_INDEX, currentIndex)
-        photoAdapter = PreviewPhotoAdapter(baseContext, photos)
+        photoAdapter = PreviewPhotoAdapter(baseContext, source)
         photoAdapter.setClickListener { switchOverlayVisibility() }
         photoAdapter.setScaleBlock {
             if (overlayFlag) {
@@ -93,15 +105,14 @@ class PreviewActivity : AppCompatActivity() {
         val selects: List<String> = intent.getStringArrayListExtra(KEY_SELECT_DATA)
         selectAdapter = PreviewSelectAdapter(baseContext, selects)
         selectAdapter.setClickListener { path ->
-            val targetPath: String? = photoAdapter.getList().findLast { it == path }
-            val selectIndex: Int = targetPath?.let { photoAdapter.getList().indexOf(it) } ?: -1
-            if (selectIndex < 0) return@setClickListener
+            val selectIndex = photoAdapter.indexOf(path)
             setCurrentIndex(selectIndex, true)
         }
     }
 
     override fun finish() {
-        val uris: List<Uri>? = if (selectLimit > 0) selectAdapter.getList().mapNotNull(Uri::parse) else null
+        val uris: List<Uri>? =
+            if (selectLimit > 0) selectAdapter.getList().mapNotNull(Uri::parse) else null
         PickUtils.setResult(this@PreviewActivity, uris, finishFlag, false)
         super.finish()
         overridePendingTransition(0, 0)
@@ -121,7 +132,8 @@ class PreviewActivity : AppCompatActivity() {
         toolbar.title = ""
         toolbar.setNavigationOnClickListener { finish() }
         if (systemUiVisibility >= 0) {
-            val lp: ViewGroup.MarginLayoutParams = toolbar.layoutParams as ViewGroup.MarginLayoutParams
+            val lp: ViewGroup.MarginLayoutParams =
+                toolbar.layoutParams as ViewGroup.MarginLayoutParams
             lp.topMargin = PickUtils.getStatusBarHeight(baseContext)
         }
         doneButton = PickActionMenu(toolbar) {
@@ -135,7 +147,7 @@ class PreviewActivity : AppCompatActivity() {
         llSelect = findViewById(R.id.llSelect)
         llSelect.setOnClickListener {
             if (currentIndex < 0) return@setOnClickListener
-            val path: String = photoAdapter.getList()[currentIndex]
+            val path: String = photoAdapter.getPath(currentIndex)
             val select: Boolean = !selectAdapter.getList().contains(path)
             if (select && selectAdapter.getList().size >= selectLimit) {
                 val hint: String = getString(R.string.pick_media_most_select_limit)
@@ -183,7 +195,8 @@ class PreviewActivity : AppCompatActivity() {
     //设置当前选中索引
     private fun setCurrentIndex(index: Int, adjust: Boolean) {
         toolbar.title = "${index + 1}/${photoAdapter.count}"
-        val select: Boolean = selectAdapter.onPreviewChanged(photoAdapter.getList()[index], selectedView)
+        val select: Boolean =
+            selectAdapter.onPreviewChanged(photoAdapter.getPath(index), selectedView)
         switchSelectBox(select, index)
         photoAdapter.getPrimaryItem()?.let { if (it.scale != 1.0f) it.scale = 1.0f }
         if (!adjust) return
@@ -222,7 +235,7 @@ class PreviewActivity : AppCompatActivity() {
     //切换选择状态
     private fun switchSelectBox(value: Boolean, index: Int) {
         checkBox.setImageResource(if (value) R.drawable.album_check_active else R.drawable.album_check_normal)
-        val path: String = photoAdapter.getList()[index]
+        val path: String = photoAdapter.getPath(index)
         val contain: Boolean = selectAdapter.getList().contains(path)
         if (value) {
             if (!contain && selectAdapter.getList().add(path)) {
@@ -242,7 +255,11 @@ class PreviewActivity : AppCompatActivity() {
         } else {
             if (selectLimit > 0) {
                 val selectCount: Int = selectAdapter.getList().size
-                val finishTitle: String = String.format(getString(R.string.pick_media_finish_format), selectCount, selectLimit)
+                val finishTitle: String = String.format(
+                    getString(R.string.pick_media_finish_format),
+                    selectCount,
+                    selectLimit
+                )
                 doneButton.item().title = finishTitle
 
             }

@@ -6,11 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 
-abstract class CommonListAdapter<T>(protected val context: Context) : RecyclerView.Adapter<ViewHolder>() {
+abstract class CommonListAdapter<T>(protected val context: Context) :
+    RecyclerView.Adapter<ViewHolder>() {
     private val data: MutableList<T> = ArrayList()
     protected abstract fun getLayoutId(viewType: Int): Int
+
     //holder,index
-    private var tapNormal: (ViewHolder, Int) -> Unit = { _, _ -> }
+    protected var tapNormal: (ViewHolder, Int) -> Unit = { _, _ -> }
+
     //holder,index,what
     protected open var tapChild: (ViewHolder, View, Int, Int) -> Unit = { _, _, _, _ -> }
 

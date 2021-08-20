@@ -3,32 +3,42 @@ package pizzk.media.picker.adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
+import android.provider.MediaStore
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import pizzk.media.picker.R
 import pizzk.media.picker.arch.PickControl
-import pizzk.media.picker.source.AlbumMediaSource
+import pizzk.media.picker.arch.PickLiveSource
 import pizzk.media.picker.source.IMedia
+import pizzk.media.picker.utils.TimeUtils
 
 class AlbumPhotoAdapter(context: Context) : CommonListAdapter<IMedia>(context) {
     private val selectedList: MutableList<IMedia> = ArrayList()
     private var selectBlock: (List<IMedia>) -> Unit = { _ -> }
     private var selectLimit: Int = 0
-    private var source: AlbumMediaSource? = null
 
     override fun getLayoutId(viewType: Int): Int = R.layout.album_photo_item
 
-    override fun getItemCount(): Int = source?.count() ?: -1
+    override fun getItemCount(): Int = PickLiveSource.source()?.count() ?: -1
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val source = source ?: return
+        val source = PickLiveSource.source() ?: return
         val item: IMedia = source[position] ?: return
         holder.itemView.tag = item
         //控件初始化
         val image: ImageView = holder.getView(R.id.image)!!
         val check: ImageView = holder.getView(R.id.check)!!
         val maskView: View = holder.getView(R.id.mask)!!
+        val vDuration: TextView = holder.getView(R.id.tvDuration)!!
+        val isVideo = item.mediaType() == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
+        vDuration.visibility = if (isVideo) View.VISIBLE else View.GONE
+        vDuration.text = if (isVideo) TimeUtils.duration(item.duration()) else ""
+        val disable = PickControl.obtain(clean = false)
+            .disableFilter()
+            .invoke(item.uri(), item.mimeType())
+        check.visibility = if (disable) View.GONE else View.VISIBLE
         //填充视图
         PickControl.imageLoad().load(image, item.uri(), item.mimeType())
         //选择
@@ -51,10 +61,11 @@ class AlbumPhotoAdapter(context: Context) : CommonListAdapter<IMedia>(context) {
             updateCheckState(item, check, maskView)
             selectBlock(getSelectList())
         }
+        holder.itemView.setOnClickListener { tapNormal(holder, position) }
     }
 
     override fun getItemId(position: Int): Long {
-        val source = source ?: return -1
+        val source = PickLiveSource.source() ?: return -1
         return source[position]?.id() ?: -1
     }
 
@@ -92,14 +103,5 @@ class AlbumPhotoAdapter(context: Context) : CommonListAdapter<IMedia>(context) {
         selectBlock(getSelectList())
     }
 
-    fun getMedias(values: List<Uri>) = values.mapNotNull { source?.of(it) }
-
-    fun source(value: AlbumMediaSource?) {
-        if (null == value) source?.close()
-        source = value
-    }
-
-    fun bucket(id: String?) {
-        source?.use(id)
-    }
+    fun getMedias(values: List<Uri>) = values.mapNotNull { PickLiveSource.source()?.of(it) }
 }

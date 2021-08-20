@@ -26,21 +26,30 @@
         android:id="@+id/tvName"
         style="@style/AlbumSectionName"
         android:layout_marginStart="@dimen/album_section_margin"
+        android:layout_marginEnd="@dimen/pick_media_activity_margin"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:minWidth="@dimen/pick_media_activity_margin"
         android:text=""
         app:layout_constraintBottom_toTopOf="@+id/tvNum"
-        app:layout_constraintLeft_toRightOf="@id/image"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toStartOf="@+id/vSelect"
+        app:layout_constraintStart_toEndOf="@+id/image"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="相册名称" />
 
     <TextView
         android:id="@+id/tvNum"
         style="@style/AlbumSectionNum"
         android:layout_marginTop="@dimen/pick_media_activity_margin"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:minWidth="@dimen/pick_media_activity_margin"
         android:text=""
         app:layout_constraintBottom_toBottomOf="@id/image"
-        app:layout_constraintLeft_toLeftOf="@id/tvName"
-        app:layout_constraintTop_toTopOf="@id/tvName" />
+        app:layout_constraintEnd_toEndOf="@+id/tvName"
+        app:layout_constraintStart_toStartOf="@+id/tvName"
+        app:layout_constraintTop_toTopOf="@id/tvName"
+        tools:text="999999" />
 
     <View
         android:id="@+id/vSelect"
@@ -52,6 +61,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -16,6 +16,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.*
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +24,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import pizzk.media.picker.R
 import pizzk.media.picker.adapter.AlbumBucketAdapter
 import pizzk.media.picker.adapter.AlbumPhotoAdapter
+import pizzk.media.picker.arch.PickLiveSource
 import pizzk.media.picker.entity.AlbumBucket
 import pizzk.media.picker.source.IMedia
 import pizzk.media.picker.utils.PickUtils
@@ -73,15 +75,17 @@ class AlbumActivity : AppCompatActivity() {
         setContentView(R.layout.activity_album)
         setupAdapter()
         initViews()
-        PickUtils.loadMediaSource(this) { source, buckets ->
-            val selectUris: List<Uri> = intent.getParcelableArrayListExtra(KEY_SELECT_DATA)
-            photoAdapter.source(source)
-            val selects = photoAdapter.getMedias(selectUris)
-            photoAdapter.updateSelectList(selects)
-            onSelectChanged(photoAdapter.getSelectList())
-            bucketAdapter.append(buckets, clean = true)
-            bucketAdapter.notifyDataSetChanged()
-        }
+        PickLiveSource.observe(this, sourceObserver)
+        PickLiveSource.load(this)
+    }
+
+    private val sourceObserver = Observer<PickLiveSource.Data> {
+        val selectUris: List<Uri> = intent.getParcelableArrayListExtra(KEY_SELECT_DATA)
+        val selects = photoAdapter.getMedias(selectUris)
+        photoAdapter.updateSelectList(selects)
+        onSelectChanged(photoAdapter.getSelectList())
+        bucketAdapter.append(it.buckets, clean = true)
+        bucketAdapter.notifyDataSetChanged()
     }
 
     //初始化适配器
@@ -90,13 +94,11 @@ class AlbumActivity : AppCompatActivity() {
         photoAdapter = AlbumPhotoAdapter(baseContext)
         photoAdapter.setSelectLimit(intent.getIntExtra(KEY_SELECT_LIMIT, 0))
         photoAdapter.setTapBlock { _, index ->
-            val uris: List<String> =
-                photoAdapter.getList().mapNotNull(IMedia::uri).map(Uri::toString)
             val selects: List<String> =
                 photoAdapter.getSelectList().mapNotNull(IMedia::uri).map(Uri::toString)
             PreviewActivity.show(
                 this@AlbumActivity,
-                uris,
+                emptyList(),
                 selects,
                 index,
                 photoAdapter.getSelectLimit()
@@ -117,7 +119,7 @@ class AlbumActivity : AppCompatActivity() {
             val name: String = section.name
             tvSection.text = name
             //更新相册
-            photoAdapter.bucket(section.id)
+            PickLiveSource.source()?.use(section.id)
             photoAdapter.notifyDataSetChanged()
         }
     }
@@ -173,20 +175,16 @@ class AlbumActivity : AppCompatActivity() {
                 changeOriginState()
             }
             tvPreview -> {
-                val uris: List<String> =
-                    photoAdapter.getSelectList().mapNotNull(IMedia::uri).map(Uri::toString)
-                if (uris.isNotEmpty()) {
-                    val selects: List<String> =
-                        photoAdapter.getSelectList().mapNotNull(IMedia::uri)
-                            .map(Uri::toString)
-                    PreviewActivity.show(
-                        this@AlbumActivity,
-                        uris,
-                        selects,
-                        0,
-                        photoAdapter.getSelectLimit()
-                    )
-                }
+                val selects: List<String> = photoAdapter.getSelectList()
+                    .mapNotNull(IMedia::uri)
+                    .map(Uri::toString)
+                PreviewActivity.show(
+                    this@AlbumActivity,
+                    emptyList(),
+                    selects,
+                    0,
+                    photoAdapter.getSelectLimit()
+                )
             }
             sectionMask -> {
                 showSectionView(false)
@@ -273,7 +271,7 @@ class AlbumActivity : AppCompatActivity() {
             PickUtils.REQUEST_CODE_PREVIEW -> {
                 val selectUris: List<Uri> = PickUtils.obtainResultUris(data)
                 finishFlag = PickUtils.isResultFinish(data)
-                photoAdapter.bucket(null)
+                PickLiveSource.source()?.use(null)
                 val selects = photoAdapter.getMedias(selectUris)
                 photoAdapter.updateSelectList(selects)
                 if (finishFlag) {
@@ -285,7 +283,8 @@ class AlbumActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        photoAdapter.source(null)
+        PickLiveSource.removeObserver(sourceObserver)
+        PickLiveSource.source()?.close()
         super.onDestroy()
     }
 }

@@ -11,7 +11,7 @@ class MediaImpl : Media() {
         mIndex = cursor.position
         mTitle = cursor.getString(MediaSourceImpl.INDEX_DISPLAY_NAME)
         mDateTaken = cursor.getLong(MediaSourceImpl.INDEX_DATE_ADDED)
-        mDuration = cursor.getLong(MediaSourceImpl.INDEX_DURATION)
+        mDuration = cursor.getLong(MediaSourceImpl.INDEX_DURATION) / 1000
         mMimeType = cursor.getString(MediaSourceImpl.INDEX_MIME_TYPE)
         mMediaType = cursor.getInt(MediaSourceImpl.INDEX_MEDIA_TYPE)
         return this

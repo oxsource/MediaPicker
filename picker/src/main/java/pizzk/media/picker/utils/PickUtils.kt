@@ -13,23 +13,19 @@ import android.content.res.Resources
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
-import androidx.core.app.ActivityCompat
-import androidx.core.content.FileProvider
-import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
 import pizzk.media.picker.R
 import pizzk.media.picker.arch.CropParams
 import pizzk.media.picker.arch.MimeType
 import pizzk.media.picker.arch.PickControl
-import pizzk.media.picker.entity.AlbumBucket
-import pizzk.media.picker.source.AlbumMediaSource
 import pizzk.media.picker.view.AlbumActivity
 import pizzk.media.picker.view.PreviewActivity
 import java.io.File
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 /**
  * 系统工具类
@@ -60,8 +56,8 @@ object PickUtils {
      */
     private fun checkPermission(activity: Activity, ps: Array<String>, requestCode: Int): Boolean {
         val notGrant: MutableList<String> = ArrayList()
-        for (i: Int in 0 until ps.size) {
-            val p: String = ps[i]
+        for (element in ps) {
+            val p: String = element
             val auth: Boolean =
                 ActivityCompat.checkSelfPermission(activity, p) == PackageManager.PERMISSION_GRANTED
             if (auth) continue
@@ -223,29 +219,6 @@ object PickUtils {
         activity.startActivityForResult(intent, REQUEST_CODE_CROP)
         PickControl.obtain(false).cropFile(file)
         return destUri
-    }
-
-    private val tLoadPool: ExecutorService = Executors.newScheduledThreadPool(1)
-
-    fun loadMediaSource(
-        activity: AppCompatActivity,
-        callback: (AlbumMediaSource, List<AlbumBucket>) -> Unit
-    ) {
-        tLoadPool.execute {
-            val source = AlbumMediaSource(activity)
-            val buckets = source.bucketIds()
-            val sections: MutableList<AlbumBucket> = ArrayList(buckets.size + 1)
-            val name = activity.getString(R.string.pick_media_all_picture)
-            source.use(id = null)
-            sections.add(AlbumBucket.of(id = "", name = name, source = source))
-            buckets.forEach { e ->
-                source.use(e.key)
-                sections.add(AlbumBucket.of(id = e.key, name = e.value, source = source))
-            }
-            source.use(id = null)
-            sections[0].select = true
-            activity.runOnUiThread { callback(source, sections) }
-        }
     }
 
     //将图像保存至系统相册

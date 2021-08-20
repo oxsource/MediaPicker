@@ -65,6 +65,10 @@
             style="@style/BottomToolText"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/llCenter"
+            android:ellipsize="end"
+            android:gravity="start|center_vertical"
+            android:maxLines="1"
             android:text="@string/pick_media_all_picture" />
 
         <LinearLayout
@@ -95,6 +99,10 @@
             style="@style/BottomToolText"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/llCenter"
+            android:ellipsize="end"
+            android:gravity="center_vertical|end"
+            android:maxLines="1"
             android:text="@string/pick_media_preview" />
     </RelativeLayout>
 </RelativeLayout>

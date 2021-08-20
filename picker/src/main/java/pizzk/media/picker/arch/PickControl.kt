@@ -28,7 +28,7 @@ class PickControl private constructor() {
         private var imageLoad: ImageLoad = ImageLoadImpl
 
         //默认函数块
-        private val disableFilter: (Uri?, String) -> Boolean = { _, _ -> true }
+        private val disableFilter: (Uri?, String) -> Boolean = { _, _ -> false }
         private val dCallback: PickCallback = PickCallback()
 
         private val picker: PickControl = PickControl()
