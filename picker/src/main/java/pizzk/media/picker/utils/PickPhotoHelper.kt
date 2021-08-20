@@ -2,6 +2,7 @@ package pizzk.media.picker.utils
 
 import android.app.Activity
 import android.net.Uri
+import android.provider.MediaStore
 import pizzk.media.picker.R
 import pizzk.media.picker.arch.CropParams
 import pizzk.media.picker.arch.PickControl
@@ -12,29 +13,27 @@ import pizzk.media.picker.view.PickChoseActivity
  */
 object PickPhotoHelper {
 
-    fun show(activity: Activity, limit: Int = 1, cropParams: CropParams? = null,
-             callback: PickControl.PickCallback) {
+    fun show(
+        activity: Activity, limit: Int = 1, cropParams: CropParams? = null,
+        callback: PickControl.PickCallback
+    ) {
         val choiceList: List<String> = listOf(
-                activity.getString(R.string.pick_chose_camera),
-                activity.getString(R.string.pick_chose_album)
+            activity.getString(R.string.pick_chose_camera),
+            activity.getString(R.string.pick_chose_album)
         )
         PickChoseActivity.show(activity, choiceList) shown@{ key ->
             val action: Int = when (key) {
-                choiceList[0] -> {
-                    PickControl.ACTION_CAMERA
-                }
-                choiceList[1] -> {
-                    PickControl.ACTION_ALBUM
-                }
+                choiceList[0] -> PickControl.ACTION_CAMERA
+                choiceList[1] -> PickControl.ACTION_ALBUM
                 else -> -1
             }
             if (action < 0) return@shown
             PickControl.obtain(true)
-                    .action(action)
-                    .limit(limit)
-                    .callback(callback)
-                    .crop(cropParams)
-                    .done(activity)
+                .action(action)
+                .limit(limit)
+                .callback(callback)
+                .crop(cropParams)
+                .done(activity)
         }
     }
 }

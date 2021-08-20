@@ -23,12 +23,14 @@ import androidx.viewpager.widget.ViewPager
 import pizzk.media.picker.R
 import pizzk.media.picker.adapter.PreviewPhotoAdapter
 import pizzk.media.picker.adapter.PreviewSelectAdapter
+import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.arch.PickLiveSource
 import pizzk.media.picker.listener.PagerListener
 import pizzk.media.picker.listener.SimpleAnimationListener
 import pizzk.media.picker.source.IMediaSource
 import pizzk.media.picker.source.PathMediaSource
 import pizzk.media.picker.utils.PickUtils
+import kotlin.math.min
 
 @SuppressLint("NotifyDataSetChanged")
 class PreviewActivity : AppCompatActivity() {
@@ -94,7 +96,6 @@ class PreviewActivity : AppCompatActivity() {
         val temp: IMediaSource? = if (photos.isEmpty()) PickLiveSource.source() else null
         val source = temp ?: PathMediaSource(baseContext, photos)
         //预览相关
-        currentIndex = intent.getIntExtra(KEY_INDEX, currentIndex)
         photoAdapter = PreviewPhotoAdapter(baseContext, source)
         photoAdapter.setClickListener { switchOverlayVisibility() }
         photoAdapter.setScaleBlock {
@@ -108,8 +109,11 @@ class PreviewActivity : AppCompatActivity() {
         selectAdapter = PreviewSelectAdapter(baseContext, selects)
         selectAdapter.setClickListener { path ->
             val selectIndex = photoAdapter.indexOf(path)
+            if (selectIndex < 0) return@setClickListener
             setCurrentIndex(selectIndex, true)
         }
+        currentIndex = intent.getIntExtra(KEY_INDEX, 0)
+        currentIndex = min(currentIndex, photoAdapter.count)
     }
 
     override fun finish() {
@@ -245,6 +249,10 @@ class PreviewActivity : AppCompatActivity() {
     private fun switchSelectBox(value: Boolean, index: Int) {
         checkBox.setImageResource(if (value) R.drawable.album_check_active else R.drawable.album_check_normal)
         val path: String = photoAdapter.getPath(index)
+        photoAdapter.get(index)?.let { media ->
+            val enable = PickControl.obtain().filter().invoke(media)
+            llSelect.visibility = if (enable) View.VISIBLE else View.GONE
+        }
         val contain: Boolean = selectAdapter.getList().contains(path)
         if (value) {
             if (!contain && selectAdapter.getList().add(path)) {

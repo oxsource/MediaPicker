@@ -129,7 +129,7 @@ class AlbumActivity : AppCompatActivity() {
     private fun initViews() {
         //标题栏
         toolbar = findViewById(R.id.toolbar)
-        toolbar.title = PickControl.obtain(clean = false).title()
+        toolbar.title = PickControl.obtain().title()
         if (toolbar.title.isNullOrEmpty()) {
             toolbar.title = getString(R.string.pick_media_select_picture)
         }
@@ -178,14 +178,15 @@ class AlbumActivity : AppCompatActivity() {
                 updateOriginState()
             }
             tvPreview -> {
-                val selects: List<String> = photoAdapter.getSelectList()
-                    .mapNotNull(IMedia::uri)
-                    .map(Uri::toString)
+                val medias = photoAdapter.getSelectList()
+                val selects: List<String> = medias.mapNotNull(IMedia::uri).map(Uri::toString)
+                if (selects.isEmpty()) return
+                val index = medias.firstOrNull()?.index() ?: 0
                 PreviewActivity.show(
                     this@AlbumActivity,
-                    emptyList(),
                     selects,
-                    0,
+                    selects,
+                    index,
                     photoAdapter.getSelectLimit()
                 )
             }
@@ -278,6 +279,8 @@ class AlbumActivity : AppCompatActivity() {
                 PickLiveSource.source()?.use(null)
                 val selects = photoAdapter.getMedias(selectUris)
                 photoAdapter.updateSelectList(selects)
+                //recover
+                PickLiveSource.source()?.use(bucketAdapter.getSelectBucket()?.id)
                 if (finishFlag) {
                     finish()
                     return

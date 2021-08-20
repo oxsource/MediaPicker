@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.annotation.IntDef
+import pizzk.media.picker.source.IMedia
 import pizzk.media.picker.utils.ImageLoadImpl
 import pizzk.media.picker.view.PickActivity
 import java.io.File
@@ -28,14 +29,14 @@ class PickControl private constructor() {
         private var imageLoad: ImageLoad = ImageLoadImpl
 
         //默认函数块
-        private val disableFilter: (Uri?, String) -> Boolean = { _, _ -> false }
+        private val dFilter: (IMedia) -> Boolean = { _ -> true }
         private val dCallback: PickCallback = PickCallback()
 
         //原图标志
         private var originQuality: Boolean = false
         private val picker: PickControl = PickControl()
 
-        fun obtain(clean: Boolean): PickControl = if (clean) picker.clean() else picker
+        fun obtain(clean: Boolean = false): PickControl = if (clean) picker.clean() else picker
 
         fun authority(value: String) {
             this.authority = value
@@ -53,7 +54,9 @@ class PickControl private constructor() {
     }
 
     private var action: Int = ACTION_NONE
-    private var filter: (Uri?, String) -> Boolean = disableFilter
+
+    //uri, mimeType, mediaType
+    private var filter: (IMedia) -> Boolean = dFilter
     private var limit: Int = 1
     private var callback: PickCallback = dCallback
 
@@ -76,7 +79,7 @@ class PickControl private constructor() {
      */
     fun clean(): PickControl {
         action = ACTION_NONE
-        filter = disableFilter
+        filter = dFilter
         crop = null
         limit = 1
         title = ""
@@ -116,9 +119,9 @@ class PickControl private constructor() {
     }
 
     /**
-     * 通过URI和MIME过滤
+     * IMedia过滤
      */
-    fun disableFilter(block: (uri: Uri?, mime: String) -> Boolean): PickControl {
+    fun filter(block: (IMedia) -> Boolean): PickControl {
         this.filter = block
         return this
     }
@@ -169,7 +172,7 @@ class PickControl private constructor() {
     /**
      * 获取过滤器
      */
-    internal fun disableFilter(): (Uri?, String) -> Boolean = filter
+    internal fun filter(): (IMedia) -> Boolean = filter
 
     /**
      * 获取裁切参数

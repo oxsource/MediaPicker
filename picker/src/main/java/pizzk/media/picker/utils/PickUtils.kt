@@ -104,7 +104,7 @@ object PickUtils {
     fun launchAlbum(activity: AppCompatActivity) {
         val access: Boolean = checkPermission(activity, externalPermission, REQUEST_CODE_ALBUM)
         if (!access) return
-        val picker: PickControl = PickControl.obtain(false)
+        val picker: PickControl = PickControl.obtain()
         val uris: List<Uri> = picker.selects().mapNotNull(PickUtils::path2Uri)
         val invalidCount: Int = picker.selects().size - uris.size
         //去除非本地的图片计数
@@ -139,7 +139,7 @@ object PickUtils {
         val uri: Uri = FileProvider.getUriForFile(activity, PickControl.authority(), file)
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
         activity.startActivityForResult(intent, REQUEST_CODE_CAMERA)
-        PickControl.obtain(false).cameraFile(file)
+        PickControl.obtain().cameraFile(file)
         return uri
     }
 
@@ -147,7 +147,7 @@ object PickUtils {
      * 启动预览
      */
     fun launchPreview(activity: AppCompatActivity) {
-        val picker: PickControl = PickControl.obtain(false)
+        val picker: PickControl = PickControl.obtain()
         val uris: List<String> = picker.selects()
         val index: Int = picker.index()
         val selectLimit = 0
@@ -158,7 +158,7 @@ object PickUtils {
      * 启动裁剪
      */
     fun launchCrop(activity: AppCompatActivity): Uri? {
-        val cropParams: CropParams? = PickControl.obtain(false).crop()
+        val cropParams: CropParams? = PickControl.obtain().crop()
         //检查裁切参数
         if (null == cropParams) {
             Log.d(activity::class.java.simpleName, "please special crop params")
@@ -217,7 +217,7 @@ object PickUtils {
             activity.grantUriPermission(packageName, destUri, grantFlag)
         }
         activity.startActivityForResult(intent, REQUEST_CODE_CROP)
-        PickControl.obtain(false).cropFile(file)
+        PickControl.obtain().cropFile(file)
         return destUri
     }
 

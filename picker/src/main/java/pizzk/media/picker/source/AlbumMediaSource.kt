@@ -55,9 +55,10 @@ class AlbumMediaSource(context: Context) : MediaSourceImpl(
      *
      * @param id bucket id
      */
-    fun use(id: String?) {
-        val obj: Cursor = getCursor() as? AlbumMediaCursor ?: return
+    fun use(id: String?): AlbumMediaSource {
+        val obj: Cursor = getCursor() as? AlbumMediaCursor ?: return this
         val cursor: AlbumMediaCursor = obj as AlbumMediaCursor
         offset = cursor.moveToBucket(id, offset)
+        return this
     }
 }

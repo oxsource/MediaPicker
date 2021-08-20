@@ -26,7 +26,6 @@ class AlbumPhotoAdapter(context: Context) : CommonListAdapter<IMedia>(context) {
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val source = PickLiveSource.source() ?: return
         val item: IMedia = source[position] ?: return
-        holder.itemView.tag = item
         //控件初始化
         val image: ImageView = holder.getView(R.id.image)!!
         val check: ImageView = holder.getView(R.id.check)!!
@@ -35,10 +34,10 @@ class AlbumPhotoAdapter(context: Context) : CommonListAdapter<IMedia>(context) {
         val isVideo = item.mediaType() == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
         vDuration.visibility = if (isVideo) View.VISIBLE else View.GONE
         vDuration.text = if (isVideo) TimeUtils.duration(item.duration()) else ""
-        val disable = PickControl.obtain(clean = false)
-            .disableFilter()
-            .invoke(item.uri(), item.mimeType())
-        check.visibility = if (disable) View.GONE else View.VISIBLE
+        val enable = PickControl.obtain()
+            .filter()
+            .invoke(item)
+        check.visibility = if (enable) View.VISIBLE else View.GONE
         //填充视图
         PickControl.imageLoad().load(image, item.uri(), item.mimeType())
         //选择

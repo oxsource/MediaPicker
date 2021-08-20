@@ -10,10 +10,27 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <VideoView
+        android:id="@+id/video"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/vCover"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
+
     <ImageView
         android:id="@+id/vPause"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="@dimen/album_preview_video_pause_size"
+        android:layout_height="@dimen/album_preview_video_pause_size"
         android:src="@mipmap/icon_video_pause"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -22,12 +39,4 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="ContentDescription"
         tools:visibility="visible" />
-
-    <VideoView
-        android:id="@+id/video"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

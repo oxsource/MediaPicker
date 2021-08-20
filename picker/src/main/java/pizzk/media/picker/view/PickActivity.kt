@@ -19,20 +19,12 @@ class PickActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pick)
-        val picker: PickControl = PickControl.obtain(false)
+        val picker: PickControl = PickControl.obtain()
         when (picker.action()) {
-            PickControl.ACTION_ALBUM -> {
-                PickUtils.launchAlbum(this@PickActivity)
-            }
-            PickControl.ACTION_CAMERA -> {
-                PickUtils.launchCamera(this@PickActivity)
-            }
-            PickControl.ACTION_PREVIEW -> {
-                PickUtils.launchPreview(this@PickActivity)
-            }
-            PickControl.ACTION_CROP -> {
-                PickUtils.launchCrop(this@PickActivity)
-            }
+            PickControl.ACTION_ALBUM -> PickUtils.launchAlbum(this@PickActivity)
+            PickControl.ACTION_CAMERA -> PickUtils.launchCamera(this@PickActivity)
+            PickControl.ACTION_PREVIEW -> PickUtils.launchPreview(this@PickActivity)
+            PickControl.ACTION_CROP -> PickUtils.launchCrop(this@PickActivity)
             else -> {
                 Log.d(TAG, "PickControl not support action: ${picker.action()}")
                 finish()
@@ -65,7 +57,7 @@ class PickActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        val picker: PickControl = PickControl.obtain(false)
+        val picker: PickControl = PickControl.obtain()
         if (Activity.RESULT_CANCELED == resultCode) {
             Log.d(TAG, getString(R.string.pick_media_user_cancel))
             picker.callback().onFailure(true, "")
@@ -79,7 +71,7 @@ class PickActivity : AppCompatActivity() {
         }
         when (requestCode) {
             PickUtils.REQUEST_CODE_CAMERA -> {
-                val file: File? = PickControl.obtain(false).cameraFile()
+                val file: File? = PickControl.obtain().cameraFile()
                 if (null != file) {
                     val uri: Uri = PickUtils.saveToAlbum(baseContext, file)
                     if (null != picker.crop() && picker.limit() == 1) {
@@ -108,10 +100,10 @@ class PickActivity : AppCompatActivity() {
                 finish()
             }
             PickUtils.REQUEST_CODE_CROP -> {
-                val file: File? = PickControl.obtain(false).cropFile()
+                val file: File? = PickControl.obtain().cropFile()
                 if (null != file) {
                     val uri: Uri = PickUtils.saveToAlbum(baseContext, file)
-                    PickControl.obtain(false).callback().onSuccess(picker.action(), listOf(uri))
+                    PickControl.obtain().callback().onSuccess(picker.action(), listOf(uri))
                 } else {
                     picker.callback().onFailure(false, "request crop failed.")
                 }

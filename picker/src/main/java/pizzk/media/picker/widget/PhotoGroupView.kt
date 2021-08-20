@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.Rect
 import android.net.Uri
+import android.provider.MediaStore
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
@@ -137,12 +138,8 @@ class PhotoGroupView : RecyclerView {
         crop: CropParams?
     ) {
         val action: Int = when (key) {
-            choiceList[0] -> {
-                PickControl.ACTION_CAMERA
-            }
-            choiceList[1] -> {
-                PickControl.ACTION_ALBUM
-            }
+            choiceList[0] -> PickControl.ACTION_CAMERA
+            choiceList[1] -> PickControl.ACTION_ALBUM
             else -> -1
         }
         if (action < 0) return
@@ -174,6 +171,7 @@ class PhotoGroupView : RecyclerView {
         PickControl.obtain(clean = true).action(action)
             .selects(selects)
             .limit(limit)
+            .filter { it.mediaType() == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE }
             .crop(crop)
             .callback(block)
             .done(activity)
