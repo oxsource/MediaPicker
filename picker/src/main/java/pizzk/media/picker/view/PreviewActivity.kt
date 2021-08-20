@@ -198,7 +198,8 @@ class PreviewActivity : AppCompatActivity() {
         val select: Boolean =
             selectAdapter.onPreviewChanged(photoAdapter.getPath(index), selectedView)
         switchSelectBox(select, index)
-        photoAdapter.getPrimaryItem()?.let { if (it.scale != 1.0f) it.scale = 1.0f }
+        photoAdapter.resetScale()
+        photoAdapter.stopPlay()
         if (!adjust) return
         val smooth = false
         photosView.setCurrentItem(index, smooth)
@@ -265,5 +266,10 @@ class PreviewActivity : AppCompatActivity() {
             }
             doneButton.enable(true)
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        photoAdapter.stopPlay()
     }
 }

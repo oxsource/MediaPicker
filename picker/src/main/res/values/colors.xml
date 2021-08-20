@@ -10,6 +10,7 @@
     <color name="album_item_uncheck">#ffffff</color>
     <color name="album_section_mask">#eb212123</color>
     <color name="album_section_background">#ffffff</color>
+    <color name="album_preview_pause_bkg">#52000000</color>
     <!--预览-->
     <color name="pick_preview_overlay">#e5000000</color>
     <color name="pick_review_background">#000000</color>
