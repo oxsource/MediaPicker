@@ -31,6 +31,8 @@ class PickControl private constructor() {
         private val disableFilter: (Uri?, String) -> Boolean = { _, _ -> false }
         private val dCallback: PickCallback = PickCallback()
 
+        //原图标志
+        private var originQuality: Boolean = false
         private val picker: PickControl = PickControl()
 
         fun obtain(clean: Boolean): PickControl = if (clean) picker.clean() else picker
@@ -42,6 +44,12 @@ class PickControl private constructor() {
         fun authority() = authority
 
         fun imageLoad() = imageLoad
+
+        fun originQuality() = originQuality
+
+        internal fun setOriginQuality(value: Boolean) {
+            originQuality = value
+        }
     }
 
     private var action: Int = ACTION_NONE
@@ -60,6 +68,9 @@ class PickControl private constructor() {
     //拍照
     private var cameraFile: File? = null
 
+    //标题
+    private var title: String = ""
+
     /**
      * 重置配置属性
      */
@@ -68,6 +79,7 @@ class PickControl private constructor() {
         filter = disableFilter
         crop = null
         limit = 1
+        title = ""
         callback = dCallback
         selects = emptyList()
         index = 0
@@ -95,6 +107,11 @@ class PickControl private constructor() {
      */
     fun limit(value: Int): PickControl {
         this.limit = if (value < 1) 1 else value
+        return this
+    }
+
+    fun title(value: String): PickControl {
+        this.title = value
         return this
     }
 
@@ -163,6 +180,11 @@ class PickControl private constructor() {
      * 获取拾取图片数量限制
      */
     internal fun limit(): Int = limit
+
+    /**
+     * 获取标题名称
+     */
+    internal fun title(): String = title
 
     /**
      * 获取回调函数

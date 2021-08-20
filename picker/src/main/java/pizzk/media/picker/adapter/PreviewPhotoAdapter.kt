@@ -37,10 +37,10 @@ class PreviewPhotoAdapter(private val context: Context, private val source: IMed
             views.removeAt(0)
         }
         container.addView(view, lp)
-        view.setOnClickListener(clickBlock)
         //
         val vPhoto = view.findViewById<PhotoView>(R.id.vPhoto)
         vPhoto.setOnScaleChangeListener { _, _, _ -> scaleBlock() }
+        vPhoto.setOnClickListener(clickBlock)
         val vVideo = view.findViewById<VideoView>(R.id.video)
         val vPause = view.findViewById<View>(R.id.vPause)
         //
@@ -91,7 +91,7 @@ class PreviewPhotoAdapter(private val context: Context, private val source: IMed
     fun resetScale() {
         val view = vCurrent ?: return
         val vPhoto = view.findViewById<PhotoView>(R.id.vPhoto)
-        if (vPhoto.scale != 1.0f) vPhoto.scale = 1.0f
+        vPhoto.scale = 1.0f
     }
 
     fun stopPlay() {

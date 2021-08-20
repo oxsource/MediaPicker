@@ -307,14 +307,9 @@ object PickUtils {
     fun hideSystemStatusBar(activity: Activity?): Boolean {
         activity ?: return false
         val decorView: View = activity.window.decorView
-        val flag: Boolean =
-            0 == (decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
-        activity.intent.putExtra(KEY_NAVIGATION_FLAG, flag)
         decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                or View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                or View.SYSTEM_UI_FLAG_FULLSCREEN
                 or View.SYSTEM_UI_FLAG_IMMERSIVE)
         return true
     }
@@ -323,12 +318,8 @@ object PickUtils {
     fun showSystemStatusBar(activity: Activity?): Boolean {
         activity ?: return false
         val decorView: View = activity.window.decorView
-        decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
-        if (!activity.intent.getBooleanExtra(KEY_NAVIGATION_FLAG, false)) {
-            decorView.systemUiVisibility =
-                decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        }
+        decorView.systemUiVisibility =
+            (View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
         return true
     }
 

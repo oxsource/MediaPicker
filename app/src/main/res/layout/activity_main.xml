@@ -48,7 +48,7 @@
         android:layout_marginStart="@dimen/pick_media_activity_margin"
         android:layout_marginTop="25dp"
         android:layout_marginBottom="@dimen/pick_media_activity_margin"
-        android:text="@string/pick_sigle_photo"
+        android:text="@string/pick_single_photo"
         android:textColor="@color/pick_chose_text_color"
         android:textSize="18sp" />
 

@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.ImageView
@@ -126,6 +128,12 @@ class PreviewActivity : AppCompatActivity() {
             PickUtils.showSystemStatusBar(this)
         } else {
             systemUiVisibility = -1
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val lp: WindowManager.LayoutParams = window.attributes
+            val mode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            lp.layoutInDisplayCutoutMode = mode
+            window.attributes = lp
         }
         //标题栏
         toolbar = findViewById(R.id.toolbar)

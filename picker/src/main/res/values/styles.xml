@@ -9,6 +9,11 @@
         <item name="android:background">@color/pick_accent_color</item>
         <item name="navigationIcon">@drawable/pick_title_back</item>
         <item name="titleTextColor">@color/pick_title_color</item>
+        <item name="titleTextAppearance">@style/PickToolbarTitle</item>
+    </style>
+
+    <style name="PickToolbarTitle">
+        <item name="android:textSize">16sp</item>
     </style>
 
     <style name="PickToolbarTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">

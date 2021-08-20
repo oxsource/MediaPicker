@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import pizzk.media.picker.R
 import pizzk.media.picker.adapter.AlbumBucketAdapter
 import pizzk.media.picker.adapter.AlbumPhotoAdapter
+import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.arch.PickLiveSource
 import pizzk.media.picker.entity.AlbumBucket
 import pizzk.media.picker.source.IMedia
@@ -63,7 +64,6 @@ class AlbumActivity : AppCompatActivity() {
     private lateinit var bucketAdapter: AlbumBucketAdapter
 
     //标志位
-    private var useOriginPhoto: Boolean = false
     private var finishFlag: Boolean = false
 
     //动画
@@ -129,7 +129,10 @@ class AlbumActivity : AppCompatActivity() {
     private fun initViews() {
         //标题栏
         toolbar = findViewById(R.id.toolbar)
-        toolbar.title = getString(R.string.pick_media_select_picture)
+        toolbar.title = PickControl.obtain(clean = false).title()
+        if (toolbar.title.isNullOrEmpty()) {
+            toolbar.title = getString(R.string.pick_media_select_picture)
+        }
         toolbar.setNavigationOnClickListener { finish() }
         //提交按钮
         doneButton = PickActionMenu(toolbar) {
@@ -148,7 +151,7 @@ class AlbumActivity : AppCompatActivity() {
         tvSection = findViewById(R.id.tvSection)
         tvSection.setOnClickListener(::onWidgetClick)
         vCenter = findViewById(R.id.vCenter)
-        changeOriginState()
+        updateOriginState()
         llCenter = findViewById(R.id.llCenter)
         llCenter.setOnClickListener(::onWidgetClick)
         tvPreview = findViewById(R.id.tvPreview)
@@ -171,8 +174,8 @@ class AlbumActivity : AppCompatActivity() {
                 showSectionView(View.VISIBLE != sectionMask.visibility)
             }
             llCenter -> {
-                useOriginPhoto = !useOriginPhoto
-                changeOriginState()
+                PickControl.setOriginQuality(!PickControl.originQuality())
+                updateOriginState()
             }
             tvPreview -> {
                 val selects: List<String> = photoAdapter.getSelectList()
@@ -252,7 +255,8 @@ class AlbumActivity : AppCompatActivity() {
     }
 
     //调整原图选中状态
-    private fun changeOriginState(check: Boolean = useOriginPhoto) {
+    private fun updateOriginState() {
+        val check = PickControl.originQuality()
         val res: Int = if (check) R.drawable.pick_radio_checked else R.drawable.pick_radio_normal
         vCenter.background = ContextCompat.getDrawable(baseContext, res)
     }
