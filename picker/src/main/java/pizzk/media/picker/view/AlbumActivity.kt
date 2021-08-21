@@ -181,12 +181,11 @@ class AlbumActivity : AppCompatActivity() {
                 val medias = photoAdapter.getSelectList()
                 val selects: List<String> = medias.mapNotNull(IMedia::uri).map(Uri::toString)
                 if (selects.isEmpty()) return
-                val index = medias.firstOrNull()?.index() ?: 0
                 PreviewActivity.show(
                     this@AlbumActivity,
                     selects,
                     selects,
-                    index,
+                    0,
                     photoAdapter.getSelectLimit()
                 )
             }

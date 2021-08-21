@@ -76,7 +76,7 @@ class PreviewActivity : AppCompatActivity() {
     private lateinit var selectAdapter: PreviewSelectAdapter
 
     //标志
-    private var currentIndex: Int = 0
+    private var currentPageIndex: Int = 0
     private var selectLimit: Int = 0
     private var finishFlag: Boolean = false
 
@@ -110,10 +110,8 @@ class PreviewActivity : AppCompatActivity() {
         selectAdapter.setClickListener { path ->
             val selectIndex = photoAdapter.indexOf(path)
             if (selectIndex < 0) return@setClickListener
-            setCurrentIndex(selectIndex, true)
+            setCurrentPageIndex(selectIndex, true)
         }
-        currentIndex = intent.getIntExtra(KEY_INDEX, 0)
-        currentIndex = min(currentIndex, photoAdapter.count)
     }
 
     override fun finish() {
@@ -158,8 +156,8 @@ class PreviewActivity : AppCompatActivity() {
         checkBox = findViewById(R.id.check)
         llSelect = findViewById(R.id.llSelect)
         llSelect.setOnClickListener {
-            if (currentIndex < 0) return@setOnClickListener
-            val path: String = photoAdapter.getPath(currentIndex)
+            if (currentPageIndex < 0) return@setOnClickListener
+            val path: String = photoAdapter.getPath(currentPageIndex)
             val select: Boolean = !selectAdapter.getList().contains(path)
             if (select && selectAdapter.getList().size >= selectLimit) {
                 val hint: String = getString(R.string.pick_media_most_select_limit)
@@ -167,7 +165,7 @@ class PreviewActivity : AppCompatActivity() {
                 Toast.makeText(baseContext, content, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            switchSelectBox(select, currentIndex)
+            switchSelectBox(select, path, currentPageIndex)
             selectAdapter.onPreviewChanged(path, selectedView)
         }
         //选中列表
@@ -181,40 +179,43 @@ class PreviewActivity : AppCompatActivity() {
         photosView.addOnPageChangeListener(object : PagerListener() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                if (position == currentIndex) return
-                currentIndex = position
-                setCurrentIndex(position, false)
+                if (position == currentPageIndex) return
+                setCurrentPageIndex(position, false)
             }
         })
         photosView.adapter = photoAdapter
         //状态更新
-        setCurrentIndex(currentIndex, true)
+        val index = intent.getIntExtra(KEY_INDEX, 0)
+        setCurrentPageIndex(min(index, photoAdapter.count - 1), true)
         notifyBottomChanged(true)
     }
 
-
     private fun notifyBottomChanged(shown: Boolean) {
+        val views = arrayOf(rlBottom, selectedView)
+        val vis = views.map { it.visibility }.toMutableList()
         if (selectLimit > 0) {
-            rlBottom.visibility = if (shown) View.VISIBLE else View.GONE
+            vis[0] = if (shown) View.VISIBLE else View.GONE
             val emptySelect: Boolean = selectAdapter.getList().isEmpty()
-            selectedView.visibility = if (shown && !emptySelect) View.VISIBLE else View.GONE
+            vis[1] = if (shown && !emptySelect) View.VISIBLE else View.GONE
         } else {
-            rlBottom.visibility = View.GONE
-            selectedView.visibility = View.GONE
+            vis[0] = View.GONE
+            vis[1] = View.GONE
         }
+        views.forEachIndexed { i, v -> if (v.visibility != vis[i]) v.visibility = vis[i] }
     }
 
     //设置当前选中索引
-    private fun setCurrentIndex(index: Int, adjust: Boolean) {
+    private fun setCurrentPageIndex(index: Int, adjust: Boolean) {
+        currentPageIndex = index
         toolbar.title = "${index + 1}/${photoAdapter.count}"
-        val select: Boolean =
-            selectAdapter.onPreviewChanged(photoAdapter.getPath(index), selectedView)
-        switchSelectBox(select, index)
+        val path = photoAdapter.getPath(index)
+        val select: Boolean = selectAdapter.getList().contains(path)
+        switchSelectBox(select, path, index)
+        selectAdapter.onPreviewChanged(path, selectedView)
         photoAdapter.resetScale()
         photoAdapter.stopPlay()
         if (!adjust) return
-        val smooth = false
-        photosView.setCurrentItem(index, smooth)
+        photosView.setCurrentItem(index, false)
     }
 
     //切换显示、隐藏标题等界面
@@ -246,15 +247,14 @@ class PreviewActivity : AppCompatActivity() {
     }
 
     //切换选择状态
-    private fun switchSelectBox(value: Boolean, index: Int) {
-        checkBox.setImageResource(if (value) R.drawable.album_check_active else R.drawable.album_check_normal)
-        val path: String = photoAdapter.getPath(index)
+    private fun switchSelectBox(select: Boolean, path: String, index: Int) {
+        checkBox.setImageResource(if (select) R.drawable.album_check_active else R.drawable.album_check_normal)
         photoAdapter.get(index)?.let { media ->
             val enable = PickControl.obtain().filter().invoke(media)
             llSelect.visibility = if (enable) View.VISIBLE else View.GONE
         }
         val contain: Boolean = selectAdapter.getList().contains(path)
-        if (value) {
+        if (select) {
             if (!contain && selectAdapter.getList().add(path)) {
                 notifyBottomChanged(true)
                 selectAdapter.notifyDataSetChanged()
