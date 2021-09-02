@@ -15,8 +15,8 @@ import pizzk.media.picker.source.IMedia
 import pizzk.media.picker.utils.TimeUtils
 
 class AlbumPhotoAdapter(context: Context) : CommonListAdapter<IMedia>(context) {
-    private val selectedList: MutableList<IMedia> = ArrayList()
-    private var selectBlock: (List<IMedia>) -> Unit = { _ -> }
+    private val selectedList: MutableList<Uri> = ArrayList()
+    private var selectBlock: (List<Uri>) -> Unit = { _ -> }
     private var selectLimit: Int = 0
 
     override fun getLayoutId(viewType: Int): Int = R.layout.album_photo_item
@@ -43,9 +43,10 @@ class AlbumPhotoAdapter(context: Context) : CommonListAdapter<IMedia>(context) {
         //选择
         updateCheckState(item, check, maskView)
         check.setOnClickListener {
-            val selected: Boolean = getSelectList().contains(item)
+            val uri = item.uri()
+            val selected: Boolean = getSelectList().contains(uri)
             if (selected) {
-                selectedList.remove(item)
+                selectedList.remove(uri)
                 updateCheckState(item, check, maskView)
                 selectBlock(getSelectList())
                 return@setOnClickListener
@@ -56,7 +57,7 @@ class AlbumPhotoAdapter(context: Context) : CommonListAdapter<IMedia>(context) {
                 Toast.makeText(context, content, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            selectedList.add(item)
+            uri?.let { selectedList.add(it) }
             updateCheckState(item, check, maskView)
             selectBlock(getSelectList())
         }
@@ -77,7 +78,8 @@ class AlbumPhotoAdapter(context: Context) : CommonListAdapter<IMedia>(context) {
 
     //更新选中状态
     private fun updateCheckState(item: IMedia, view: ImageView, mask: View) {
-        val selected: Boolean = getSelectList().contains(item)
+        val uri = item.uri()
+        val selected: Boolean = getSelectList().contains(uri)
         if (selected) {
             mask.visibility = View.VISIBLE
             view.setImageResource(R.drawable.album_check_active)
@@ -87,15 +89,15 @@ class AlbumPhotoAdapter(context: Context) : CommonListAdapter<IMedia>(context) {
         }
     }
 
-    fun setSelectBlock(block: (List<IMedia>) -> Unit) {
+    fun setSelectBlock(block: (List<Uri>) -> Unit) {
         this.selectBlock = block
     }
 
-    fun getSelectList(): List<IMedia> = selectedList
+    fun getSelectList(): List<Uri> = selectedList
 
     @SuppressLint("NotifyDataSetChanged")
-    fun updateSelectList(selects: List<IMedia>?) {
-        val list: List<IMedia> = selects ?: return
+    fun updateSelectList(selects: List<Uri>?) {
+        val list: List<Uri> = selects ?: return
         selectedList.clear()
         selectedList.addAll(list)
         notifyDataSetChanged()

@@ -22,6 +22,7 @@ abstract class MediaFactory(
     override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Int, IMedia>?): Boolean {
         if (size <= capacity) return false
         if (recycles.size < capacity && null != eldest) {
+            eldest.value.recycle()
             recycles.add(eldest.value)
         }
         return true

@@ -15,6 +15,7 @@ interface IMedia {
     fun mimeType(): String
     fun mediaType(): Int
     fun of(source: IMediaSource, cursor: Cursor): IMedia
+    fun recycle()
 }
 
 abstract class Media : IMedia {
@@ -30,7 +31,13 @@ abstract class Media : IMedia {
     protected var mMediaType = 0
 
     override fun equals(other: Any?): Boolean {
-        return if (other !is Media) false else mUri == other.mUri
+        val e = other ?: return false
+        val media = (e as? Media) ?: return false
+        val uri = media.mUri ?: return false
+        if (bucketId() != media.mBucketId) return false
+        if (id() != media.mId) return false
+        if (uri() != uri) return false
+        return true
     }
 
     override fun hashCode(): Int = mUri?.hashCode() ?: super.hashCode()
@@ -54,4 +61,17 @@ abstract class Media : IMedia {
     override fun mimeType(): String = mMimeType
 
     override fun mediaType(): Int = mMediaType
+
+    override fun recycle() {
+        mContainer = null
+        mId = 0
+        mUri = null
+        mBucketId = ""
+        mIndex = 0
+        mTitle = ""
+        mDateTaken = 0
+        mDuration = 0
+        mMimeType = ""
+        mMediaType = 0
+    }
 }

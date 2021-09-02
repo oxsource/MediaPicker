@@ -27,7 +27,6 @@ import pizzk.media.picker.adapter.AlbumPhotoAdapter
 import pizzk.media.picker.arch.PickControl
 import pizzk.media.picker.arch.PickLiveSource
 import pizzk.media.picker.entity.AlbumBucket
-import pizzk.media.picker.source.IMedia
 import pizzk.media.picker.utils.PickUtils
 
 /**
@@ -81,8 +80,7 @@ class AlbumActivity : AppCompatActivity() {
 
     private val sourceObserver = Observer<PickLiveSource.Data> {
         val selectUris: List<Uri> = intent.getParcelableArrayListExtra(KEY_SELECT_DATA)
-        val selects = photoAdapter.getMedias(selectUris)
-        photoAdapter.updateSelectList(selects)
+        photoAdapter.updateSelectList(selectUris)
         onSelectChanged(photoAdapter.getSelectList())
         bucketAdapter.append(it.buckets, clean = true)
         bucketAdapter.notifyDataSetChanged()
@@ -95,7 +93,7 @@ class AlbumActivity : AppCompatActivity() {
         photoAdapter.setSelectLimit(intent.getIntExtra(KEY_SELECT_LIMIT, 0))
         photoAdapter.setTapBlock { _, index ->
             val selects: List<String> =
-                photoAdapter.getSelectList().mapNotNull(IMedia::uri).map(Uri::toString)
+                photoAdapter.getSelectList().map(Uri::toString)
             PreviewActivity.show(
                 this@AlbumActivity,
                 emptyList(),
@@ -179,7 +177,7 @@ class AlbumActivity : AppCompatActivity() {
             }
             tvPreview -> {
                 val medias = photoAdapter.getSelectList()
-                val selects: List<String> = medias.mapNotNull(IMedia::uri).map(Uri::toString)
+                val selects: List<String> = medias.map(Uri::toString)
                 if (selects.isEmpty()) return
                 PreviewActivity.show(
                     this@AlbumActivity,
@@ -238,7 +236,7 @@ class AlbumActivity : AppCompatActivity() {
     }
 
     //选择发生变化回调
-    private fun onSelectChanged(list: List<IMedia>) {
+    private fun onSelectChanged(list: List<Uri>) {
         if (list.isEmpty()) {
             tvPreview.setText(R.string.pick_media_preview)
             doneButton.item().setTitle(R.string.pick_media_finish)
@@ -262,7 +260,7 @@ class AlbumActivity : AppCompatActivity() {
     }
 
     override fun finish() {
-        val uri: List<Uri> = photoAdapter.getSelectList().mapNotNull { it.uri() }
+        val uri: List<Uri> = photoAdapter.getSelectList()
         PickUtils.setResult(this@AlbumActivity, uri, finishFlag, true)
         super.finish()
         overridePendingTransition(0, 0)
@@ -275,9 +273,7 @@ class AlbumActivity : AppCompatActivity() {
             PickUtils.REQUEST_CODE_PREVIEW -> {
                 val selectUris: List<Uri> = PickUtils.obtainResultUris(data)
                 finishFlag = PickUtils.isResultFinish(data)
-                PickLiveSource.source()?.use(null)
-                val selects = photoAdapter.getMedias(selectUris)
-                photoAdapter.updateSelectList(selects)
+                photoAdapter.updateSelectList(selectUris)
                 //recover
                 PickLiveSource.source()?.use(bucketAdapter.getSelectBucket()?.id)
                 if (finishFlag) {
