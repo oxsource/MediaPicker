@@ -24,9 +24,9 @@ interface IMediaSource {
 abstract class MediaSource(
     protected var mResolver: ContentResolver?,
     protected val mBaseUri: Uri,
-    private val isAsc: Boolean,
+    protected val isAsc: Boolean,
     val mBucketId: String,
-    private val mFactory: MediaFactory
+    protected val mFactory: MediaFactory
 ) : IMediaSource {
     private var mCursor: Cursor? = null
 
@@ -126,7 +126,7 @@ abstract class MediaSource(
     // or descending, depending on the mSort variable.
     // The date is obtained from the "datetaken" column. But if it is null,
     // the "date_modified" column is used instead.
-    protected fun sortOrder(): String {
+    protected open fun sortOrder(): String {
         val ascending = if (isAsc) " ASC" else " DESC"
         // Use DATE_TAKEN if it's non-null, otherwise use DATE_MODIFIED.
         // DATE_TAKEN is in milliseconds, but DATE_MODIFIED is in seconds.

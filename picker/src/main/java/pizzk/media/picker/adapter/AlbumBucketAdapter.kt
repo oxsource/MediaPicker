@@ -19,8 +19,8 @@ class AlbumBucketAdapter(context: Context) : CommonListAdapter<AlbumBucket>(cont
         holder.setText(R.id.tvNum, "${el.size}")
         holder.setVisibility(R.id.vSelect, if (el.select) View.VISIBLE else View.GONE)
         val image: ImageView = holder.getView(R.id.image) ?: return
-        val uri = el.cover ?: return
-        PickControl.imageLoad().load(image, uri, el.mime)
+        val path = el.cover ?: return
+        PickControl.imageLoad().load(image, path, el.mime)
     }
 
     //获取选中的Section

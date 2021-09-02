@@ -19,19 +19,23 @@ object PickLiveSource : MutableLiveData<PickLiveSource.Data>() {
     fun load(context: Context) {
         value?.source?.close()
         tPool.execute {
-            val source = AlbumMediaSource(context)
-            val buckets = source.bucketIds()
-            val sections: MutableList<AlbumBucket> = ArrayList(buckets.size + 1)
-            val name = context.getString(R.string.pick_media_all_picture)
-            source.use(id = null)
-            sections.add(AlbumBucket.of(id = "", name = name, source = source))
-            buckets.forEach { e ->
-                source.use(e.key)
-                sections.add(AlbumBucket.of(id = e.key, name = e.value, source = source))
+            kotlin.runCatching {
+                val source = AlbumMediaSource(context)
+                val buckets = source.bucketIds()
+                val sections: MutableList<AlbumBucket> = ArrayList(buckets.size + 1)
+                val name = context.getString(R.string.pick_media_all_picture)
+                source.use(id = null)
+                sections.add(AlbumBucket.of(id = "", name = name, source = source))
+                buckets.forEach { e ->
+                    source.use(e.key)
+                    sections.add(AlbumBucket.of(id = e.key, name = e.value, source = source))
+                }
+                source.use(id = null)
+                sections[0].select = true
+                postValue(Data(source, sections))
+            }.onFailure {
+                it.printStackTrace()
             }
-            source.use(id = null)
-            sections[0].select = true
-            postValue(Data(source, sections))
         }
     }
 

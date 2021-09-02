@@ -61,6 +61,20 @@ open class MediaSourceImpl(
 
     override fun getMediaId(cursor: Cursor?): Long = cursor?.getLong(INDEX_ID) ?: -1
 
+    override fun sortOrder(): String {
+        val ascending = if (isAsc) " ASC" else " DESC"
+        val dateExpr = MediaStore.MediaColumns.DATE_ADDED
+        return "$dateExpr$ascending"
+    }
+
+    init {
+        val args: MutableList<String> = ArrayList(3)
+        args.add(MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString())
+        args.add(MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString())
+        if (mBucketId.isNotEmpty()) args.add(mBucketId)
+        whereArgs = args.toTypedArray()
+    }
+
     companion object {
         private const val WHERE_CLAUSE =
             "(${MediaStore.Files.FileColumns.MEDIA_TYPE}  in (?, ?)) AND ${MediaStore.MediaColumns.SIZE} > 0"
@@ -83,13 +97,5 @@ open class MediaSourceImpl(
         const val INDEX_DURATION = 4
         const val INDEX_MIME_TYPE = 5
         const val INDEX_MEDIA_TYPE = 6
-    }
-
-    init {
-        val args: MutableList<String> = ArrayList(3)
-        args.add(MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString())
-        args.add(MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString())
-        if (mBucketId.isNotEmpty()) args.add(mBucketId)
-        whereArgs = args.toTypedArray()
     }
 }

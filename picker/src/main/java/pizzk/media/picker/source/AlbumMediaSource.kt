@@ -1,7 +1,6 @@
 package pizzk.media.picker.source
 
 import android.content.Context
-import android.database.Cursor
 import android.provider.MediaStore
 import java.util.*
 
@@ -14,27 +13,21 @@ class AlbumMediaSource(context: Context) : MediaSourceImpl(
 ) {
     private val buckets: MutableMap<String, String> = mutableMapOf()
     private val sources: MutableList<MediaSourceImpl> = ArrayList<MediaSourceImpl>()
-    private var offset = 0
+    private var bucketId = ""
 
     init {
         val resolver = context.contentResolver
         buckets.putAll(super.bucketIds())
         for ((bucketId) in buckets) {
-            sources.add(MediaSourceImpl(resolver, mBaseUri, true, bucketId, MediaFactoryImpl()))
+            sources.add(MediaSourceImpl(resolver, mBaseUri, isAsc, bucketId, MediaFactoryImpl()))
         }
     }
 
     override fun bucketIds(): Map<String, String> = buckets
 
     override fun count(): Int {
-        val obj: Cursor = getCursor() as? AlbumMediaCursor ?: return super.count()
-        val cursor: AlbumMediaCursor = obj as AlbumMediaCursor
-        return cursor.counts()
-    }
-
-    override fun createCursor(): Cursor {
-        val cursors = sources.map { it.createCursor() }.toTypedArray()
-        return AlbumMediaCursor(sources, cursors)
+        val source = sources.find { it.mBucketId == bucketId } ?: return super.count()
+        return source.count()
     }
 
     override fun close() {
@@ -45,7 +38,8 @@ class AlbumMediaSource(context: Context) : MediaSourceImpl(
     }
 
     override fun get(i: Int): IMedia? {
-        return super.get(i + offset)
+        val source = sources.find { it.mBucketId == bucketId } ?: return super.get(i)
+        return source[i]
     }
 
     /**
@@ -54,9 +48,7 @@ class AlbumMediaSource(context: Context) : MediaSourceImpl(
      * @param id bucket id
      */
     fun use(id: String?): AlbumMediaSource {
-        val obj: Cursor = getCursor() as? AlbumMediaCursor ?: return this
-        val cursor: AlbumMediaCursor = obj as AlbumMediaCursor
-        offset = cursor.moveToBucket(id, offset)
+        bucketId = id ?: ""
         return this
     }
 }
