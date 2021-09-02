@@ -79,8 +79,9 @@ class AlbumActivity : AppCompatActivity() {
     }
 
     private val sourceObserver = Observer<PickLiveSource.Data> {
-        val selectUris: List<Uri> = intent.getParcelableArrayListExtra(KEY_SELECT_DATA)
-        photoAdapter.updateSelectList(selectUris)
+        val selectUris: List<Uri> =
+            intent.getParcelableArrayListExtra(KEY_SELECT_DATA) ?: emptyList()
+        photoAdapter.updateSelectList(selectUris.map(Uri::toString))
         onSelectChanged(photoAdapter.getSelectList())
         bucketAdapter.append(it.buckets, clean = true)
         bucketAdapter.notifyDataSetChanged()
@@ -92,8 +93,7 @@ class AlbumActivity : AppCompatActivity() {
         photoAdapter = AlbumPhotoAdapter(baseContext)
         photoAdapter.setSelectLimit(intent.getIntExtra(KEY_SELECT_LIMIT, 0))
         photoAdapter.setTapBlock { _, index ->
-            val selects: List<String> =
-                photoAdapter.getSelectList().map(Uri::toString)
+            val selects: List<String> = photoAdapter.getSelectList()
             PreviewActivity.show(
                 this@AlbumActivity,
                 emptyList(),
@@ -176,8 +176,7 @@ class AlbumActivity : AppCompatActivity() {
                 updateOriginState()
             }
             tvPreview -> {
-                val medias = photoAdapter.getSelectList()
-                val selects: List<String> = medias.map(Uri::toString)
+                val selects: List<String> = photoAdapter.getSelectList()
                 if (selects.isEmpty()) return
                 PreviewActivity.show(
                     this@AlbumActivity,
@@ -236,7 +235,7 @@ class AlbumActivity : AppCompatActivity() {
     }
 
     //选择发生变化回调
-    private fun onSelectChanged(list: List<Uri>) {
+    private fun onSelectChanged(list: List<String>) {
         if (list.isEmpty()) {
             tvPreview.setText(R.string.pick_media_preview)
             doneButton.item().setTitle(R.string.pick_media_finish)
@@ -260,7 +259,7 @@ class AlbumActivity : AppCompatActivity() {
     }
 
     override fun finish() {
-        val uri: List<Uri> = photoAdapter.getSelectList()
+        val uri: List<Uri> = photoAdapter.getSelectList().mapNotNull { PickUtils.path2Uri(it) }
         PickUtils.setResult(this@AlbumActivity, uri, finishFlag, true)
         super.finish()
         overridePendingTransition(0, 0)
@@ -273,7 +272,8 @@ class AlbumActivity : AppCompatActivity() {
             PickUtils.REQUEST_CODE_PREVIEW -> {
                 val selectUris: List<Uri> = PickUtils.obtainResultUris(data)
                 finishFlag = PickUtils.isResultFinish(data)
-                photoAdapter.updateSelectList(selectUris)
+                val selects = selectUris.map(Uri::toString)
+                photoAdapter.updateSelectList(selects)
                 //recover
                 PickLiveSource.source()?.use(bucketAdapter.getSelectBucket()?.id)
                 if (finishFlag) {
