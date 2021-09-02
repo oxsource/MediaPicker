@@ -13,7 +13,7 @@ data class AlbumBucket(
     companion object {
         fun of(id: String, name: String, source: MediaSource): AlbumBucket {
             val count = source.count()
-            val cover = source[0]
+            val cover = if (count > 0) source[0] else null
             return AlbumBucket(id, name, count, cover)
         }
     }
